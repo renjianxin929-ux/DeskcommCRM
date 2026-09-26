@@ -79,10 +79,10 @@ export const REGISTRO_DE_IDIOMAS = [
     rotuloCurto: "中",
     tagBcp47: "zh-CN",
     subtagsDoNavegador: ["zh"],
-    // A tradução chega pelo PR #773, de @xxjjjj. Registrar o idioma antes do
-    // catálogo é o que deixa o catálogo entrar sem aparecer para ninguém.
-    nivel: "em_construcao",
-    mantenedor: null,
+    // O fork chinês promove este catálogo a idioma servido. Novas telas devem
+    // manter o zh-CN completo junto do espanhol antes de entrar em produção.
+    nivel: "completo",
+    mantenedor: "renjianxin929-ux",
   },
 ] as const satisfies readonly IdiomaRegistrado[];
 
