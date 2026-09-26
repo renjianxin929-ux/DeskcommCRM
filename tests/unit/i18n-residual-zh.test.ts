@@ -99,6 +99,11 @@ function pdfZh(): string {
     cases: [],
     case_events: [],
     demandas: [],
+    case_chat_messages: [],
+    passagens: [],
+    avisos_de_caso: [],
+    campaign_recipients: [],
+    campaign_suppressions: [],
   } as ExportPayload;
   return textos(
     LgpdExportPdf({ data, unsignedWarning: true, idioma: "zh-CN" }) as ReactElement,
