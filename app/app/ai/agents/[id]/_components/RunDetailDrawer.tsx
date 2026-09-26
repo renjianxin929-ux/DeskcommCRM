@@ -17,6 +17,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useTagDeIdioma } from "@/hooks/i18n/useLocaleDeData";
 import { useT } from "@/hooks/i18n/useT";
 
 import { RunTrace } from "./RunTrace";
@@ -50,6 +51,7 @@ const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "
 
 export function RunDetailDrawer({ run, open, onOpenChange }: Props) {
   const t = useT();
+  const tagDoIdioma = useTagDeIdioma();
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="flex w-full flex-col gap-4 overflow-y-auto sm:max-w-2xl">
@@ -75,12 +77,12 @@ export function RunDetailDrawer({ run, open, onOpenChange }: Props) {
         {run ? (
           <div className="flex flex-col gap-4 text-sm">
             <dl className="grid grid-cols-2 gap-2 text-xs">
-              <Cell label={t("Iniciado")}>{new Date(run.started_at).toLocaleString()}</Cell>
+              <Cell label={t("Iniciado")}>{new Date(run.started_at).toLocaleString(tagDoIdioma)}</Cell>
               <Cell label={t("Concluído")}>
-                {run.completed_at ? new Date(run.completed_at).toLocaleString() : "—"}
+                {run.completed_at ? new Date(run.completed_at).toLocaleString(tagDoIdioma) : "—"}
               </Cell>
               <Cell label={t("Tokens (in/out)")}>
-                {(run.tokens_in ?? 0).toLocaleString()} / {(run.tokens_out ?? 0).toLocaleString()}
+                {(run.tokens_in ?? 0).toLocaleString(tagDoIdioma)} / {(run.tokens_out ?? 0).toLocaleString(tagDoIdioma)}
               </Cell>
               <Cell label={t("Custo")}>{fmtCost(run.cost_cents)}</Cell>
               <Cell label={t("Latência")}>{fmtLatency(run.latency_ms)}</Cell>

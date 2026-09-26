@@ -1,4 +1,5 @@
 "use client";
+import { useTagDeIdioma } from "@/hooks/i18n/useLocaleDeData";
 import { useT } from "@/hooks/i18n/useT";
 import { DownloadSimple, FileText } from "@/lib/ui/icons";
 import { cn } from "@/lib/utils";
@@ -16,13 +17,15 @@ interface Props {
 /** Card de documento: rótulo (PDF/MP4/…), tamanho e download. */
 export function DocumentCard({ messageId, mime, sizeBytes, storagePath, isOutbound }: Props) {
   const t = useT();
+  const tagDoIdioma = useTagDeIdioma();
   const label = mediaFileLabel(mime, storagePath);
+  const tamanho = formatBytes(sizeBytes, tagDoIdioma);
   return (
     <a
       href={mediaSrc(messageId)}
       target="_blank"
       rel="noreferrer"
-      aria-label={`${t("Baixar")} ${label} (${formatBytes(sizeBytes)})`}
+      aria-label={`${t("Baixar")} ${label} (${tamanho})`}
       className={cn(
         "flex w-60 items-center gap-3 rounded-lg p-2 transition-colors",
         isOutbound
@@ -40,7 +43,7 @@ export function DocumentCard({ messageId, mime, sizeBytes, storagePath, isOutbou
       </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-medium">{label}</span>
-        <span className="block text-xs opacity-70">{formatBytes(sizeBytes)}</span>
+        <span className="block text-xs opacity-70">{tamanho}</span>
       </span>
       <DownloadSimple size={18} className="shrink-0 opacity-70" aria-hidden />
     </a>

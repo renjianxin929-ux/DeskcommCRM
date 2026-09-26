@@ -65,12 +65,13 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
 
 function StatCard({ label, value, warning }: { label: string; value: number; warning?: boolean }) {
   const t = useT();
+  const tagDoIdioma = useTagDeIdioma();
   return (
     <div className={[
       "rounded-lg border p-4 flex flex-col gap-1",
       warning && value > 0 ? "border-amber-300 bg-amber-50/50 dark:border-amber-700 dark:bg-amber-950/20" : "bg-card",
     ].join(" ")}>
-      <span className="text-2xl font-bold tabular-nums">{value.toLocaleString("pt-BR")}</span>
+      <span className="text-2xl font-bold tabular-nums">{value.toLocaleString(tagDoIdioma)}</span>
       <span className="text-xs text-muted-foreground leading-tight">{label}</span>
       {warning && value > 0 && (
         <Warning size={14} weight="fill" className="text-amber-500 mt-0.5" aria-label={t("Atenção")} />
@@ -183,7 +184,7 @@ export function TenantOverview({ organization, counts, integrations }: TenantOve
                 </span>
               }
             />
-            <InfoRow label={t("Invocações IA (30d)")} value={counts.ai_invocations_30d.toLocaleString("pt-BR")} />
+            <InfoRow label={t("Invocações IA (30d)")} value={counts.ai_invocations_30d.toLocaleString(tagDoIdioma)} />
           </div>
         </div>
       </div>

@@ -28,9 +28,9 @@ import { idiomaVisivelPorCodigo } from "./registro";
  *
  * ─── O fallback é o padrão do produto, nunca o inglês ──────────────────────
  *
- * Idioma desconhecido devolve português, que é o comportamento de antes desta
- * camada. `date-fns` sem `locale` cai no inglês, e uma tela em espanhol com
- * "Thursday" é o pior dos três mundos.
+ * Idioma desconhecido devolve o padrão do produto (`IDIOMA_PADRAO`). `date-fns`
+ * sem `locale` cai no inglês, e uma tela traduzida com "Thursday" no meio é o
+ * pior dos mundos.
  */
 const LOCALE_DE_DATA: Record<Idioma, Locale> = {
   "pt-BR": ptBR,

@@ -28,8 +28,8 @@ function formatDateTick(s: string, idioma: string): string {
   });
 }
 
-function formatNumber(n: number): string {
-  return n.toLocaleString("pt-BR");
+function formatNumber(n: number, locale: string): string {
+  return n.toLocaleString(locale);
 }
 
 function formatTokens(n: number): string {
@@ -155,7 +155,7 @@ export function UsageChart({ payload }: Props) {
                 width={50}
               />
               <Tooltip
-                formatter={(value) => [formatNumber(Number(value)), t("Tokens")]}
+                formatter={(value) => [formatNumber(Number(value), tagDoIdioma), t("Tokens")]}
                 labelFormatter={(label) => formatDateTick(String(label), tagDoIdioma)}
                 contentStyle={tooltipStyle}
               />
@@ -197,7 +197,7 @@ export function UsageChart({ payload }: Props) {
                 // deixaria a régua contradizendo o rótulo — o gráfico diria
                 // "segundos" e mostraria 24.000 na lateral.
                 tickFormatter={(v: number) =>
-                  (v / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 0 })
+                  (v / 1000).toLocaleString(tagDoIdioma, { maximumFractionDigits: 0 })
                 }
                 width={40}
               />
@@ -205,7 +205,7 @@ export function UsageChart({ payload }: Props) {
                 // Segundos, não milissegundos: 17.621 ms não diz nada a quem
                 // atende; 17,6 s diz.
                 formatter={(value, name) => [
-                  `${(Number(value) / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} s`,
+                  `${(Number(value) / 1000).toLocaleString(tagDoIdioma, { maximumFractionDigits: 1 })} s`,
                   name,
                 ]}
                 labelFormatter={(label) => formatDateTick(String(label), tagDoIdioma)}

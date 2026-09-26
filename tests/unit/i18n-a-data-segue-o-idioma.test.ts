@@ -181,9 +181,9 @@ describe("a camada de data traduz de verdade", () => {
     expect(new Set(saidas).size, `os idiomas renderizaram a mesma data: ${saidas.join(" | ")}`).toBe(
       IDIOMAS.length,
     );
-    // E o português continua o que era — a camada acrescenta idioma, não muda o
-    // que quem já usava enxerga.
-    expect(saidas[0]).toBe("quinta-feira, 5 de março");
+    // O português continua o que era. O índice 0 deixou de ser pt-BR quando o
+    // padrão deste fork passou a ser zh-CN; a frase se busca pelo código.
+    expect(saidas[IDIOMAS.indexOf("pt-BR")]).toBe("quinta-feira, 5 de março");
   });
 
   it("a etiqueta BCP-47 é distinta por idioma", () => {

@@ -9,7 +9,8 @@ import { normalizarIdioma, parseAcceptLanguage, type Idioma } from "@/lib/i18n/i
  * organização de quem consultar.
  *
  * Cadeia: preferência salva → `Accept-Language` do navegador → padrão
- * pt-BR. O header é só um SINAL de primeira visita, nunca sobrepõe uma
+ * do produto (`IDIOMA_PADRAO`, zh-CN neste fork). O header é só um SINAL de
+ * primeira visita, nunca sobrepõe uma
  * preferência já salva — inclusive um valor antigo desconhecido nela (esse
  * caso já degrada pro padrão dentro de `normalizarIdioma`, e é um problema
  * diferente do que este arquivo resolve: visitante que NUNCA teve conta).

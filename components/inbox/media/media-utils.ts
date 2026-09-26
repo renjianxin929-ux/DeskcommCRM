@@ -8,13 +8,14 @@ export function mediaSrc(messageId: string): string {
   return `/api/v1/messages/${messageId}/media`;
 }
 
-export function formatBytes(bytes: number | null | undefined): string {
+export function formatBytes(bytes: number | null | undefined, locale = "pt-BR"): string {
   if (!bytes || bytes <= 0) return "—";
   if (bytes < 1024) return `${bytes} B`;
   const kb = bytes / 1024;
-  if (kb < 1024) return `${kb.toLocaleString("pt-BR", { maximumFractionDigits: 1, minimumFractionDigits: 1 })} KB`;
+  const opcoes = { maximumFractionDigits: 1, minimumFractionDigits: 1 } as const;
+  if (kb < 1024) return `${kb.toLocaleString(locale, opcoes)} KB`;
   const mb = kb / 1024;
-  return `${mb.toLocaleString("pt-BR", { maximumFractionDigits: 1, minimumFractionDigits: 1 })} MB`;
+  return `${mb.toLocaleString(locale, opcoes)} MB`;
 }
 
 /** Rótulo curto do arquivo: extensão do path ("PDF") > sufixo do mime > "Arquivo". */

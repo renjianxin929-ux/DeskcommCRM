@@ -1,15 +1,14 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { IDIOMA_PADRAO } from "@/lib/i18n/idiomas";
 import { traduzir } from "@/lib/i18n/dicionario";
+import { idiomaDoVisitante } from "@/lib/i18n/idiomaAnonimo";
 
-// Manutenção é justamente o cenário em que o Supabase pode estar fora do ar —
-// esta página não pode depender dele para saber em que idioma falar. Sem
-// sessão para consultar, fica no idioma padrão da instalação.
-const idioma = IDIOMA_PADRAO;
-
-export default function ServiceUnavailablePage() {
+// Manutenção é o cenário em que o Supabase pode estar fora do ar — esta página
+// não consulta sessão. O sinal que sobra é o Accept-Language; sem idioma
+// servido nele, vale o padrão da instalação (zh-CN), não o português.
+export default async function ServiceUnavailablePage() {
+  const idioma = await idiomaDoVisitante(null);
   return (
     <main className="flex min-h-screen items-center justify-center p-8">
       <Card className="w-full max-w-md p-8 text-center">

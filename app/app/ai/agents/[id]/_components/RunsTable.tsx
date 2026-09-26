@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 
 import { useAgentRuns, type AgentRunRow } from "@/hooks/ai/useAgentRuns";
+import { useTagDeIdioma } from "@/hooks/i18n/useLocaleDeData";
 import { useT } from "@/hooks/i18n/useT";
 import { RunDetailDrawer } from "./RunDetailDrawer";
 
@@ -48,6 +49,7 @@ function fmtCost(cents: number | null): string {
 
 export function RunsTable({ agentId, active }: Props) {
   const t = useT();
+  const tagDoIdioma = useTagDeIdioma();
   const { data, isLoading, error, refetch, isFetching } = useAgentRuns(agentId, {
     enabled: active,
     realtime: active,
@@ -112,7 +114,7 @@ export function RunsTable({ agentId, active }: Props) {
                 }}
               >
                 <TableCell className="font-mono text-xs">
-                  {new Date(r.started_at).toLocaleString()}
+                  {new Date(r.started_at).toLocaleString(tagDoIdioma)}
                 </TableCell>
                 <TableCell>
                   <Badge variant={STATUS_VARIANT[r.status] ?? "outline"} className="text-xs">
@@ -129,8 +131,8 @@ export function RunsTable({ agentId, active }: Props) {
                   )}
                 </TableCell>
                 <TableCell className="font-mono text-xs">
-                  {(r.tokens_in ?? 0).toLocaleString()} /{" "}
-                  {(r.tokens_out ?? 0).toLocaleString()}
+                  {(r.tokens_in ?? 0).toLocaleString(tagDoIdioma)} /{" "}
+                  {(r.tokens_out ?? 0).toLocaleString(tagDoIdioma)}
                 </TableCell>
                 <TableCell className="font-mono text-xs">{fmtCost(r.cost_cents)}</TableCell>
                 <TableCell className="font-mono text-xs">{fmtLatency(r.latency_ms)}</TableCell>

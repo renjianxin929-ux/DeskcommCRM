@@ -26,8 +26,8 @@ function formatDateTick(date: string, idioma: string): string {
 // DÓLAR: o número é `llm_calls.cost_cents`, e `pricing.ts` cota o provedor em USD.
 const formatCurrency = formatCentsUSD;
 
-function formatNumber(n: number): string {
-  return n.toLocaleString("pt-BR");
+function formatNumber(n: number, locale: string): string {
+  return n.toLocaleString(locale);
 }
 
 function EmptyChart() {
@@ -91,11 +91,11 @@ export function UsageCharts({ series }: UsageChartsProps) {
                 tick={{ fontSize: 11 }}
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={formatNumber}
+                tickFormatter={(v) => formatNumber(Number(v), tagDoIdioma)}
                 width={45}
               />
               <Tooltip
-                formatter={(value) => [formatNumber(Number(value)), t("Mensagens")]}
+                formatter={(value) => [formatNumber(Number(value), tagDoIdioma), t("Mensagens")]}
                 labelFormatter={(label) => formatDateTick(String(label), tagDoIdioma)}
                 contentStyle={{
                   borderRadius: "8px",
@@ -208,7 +208,7 @@ export function UsageCharts({ series }: UsageChartsProps) {
                   width={50}
                 />
                 <Tooltip
-                  formatter={(value) => [formatNumber(Number(value)), "Tokens"]}
+                  formatter={(value) => [formatNumber(Number(value), tagDoIdioma), "Tokens"]}
                   labelFormatter={(label) => formatDateTick(String(label), tagDoIdioma)}
                   contentStyle={{
                     borderRadius: "8px",

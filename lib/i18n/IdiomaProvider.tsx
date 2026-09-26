@@ -2,7 +2,21 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import { traduzir } from "./dicionario";
-import { normalizarIdioma, IDIOMA_PADRAO, type Idioma } from "./idiomas";
+import { normalizarIdioma, parseAcceptLanguage, IDIOMA_PADRAO, type Idioma } from "./idiomas";
+
+const CHAVE_IDIOMA_LOCAL = "deskcomm.idioma";
+
+/** Idioma da última sessão neste navegador, ou o do navegador, ou o padrão. */
+export function idiomaLembrado(): Idioma {
+  if (typeof window === "undefined") return IDIOMA_PADRAO;
+  try {
+    const salvo = window.localStorage.getItem(CHAVE_IDIOMA_LOCAL);
+    if (salvo) return normalizarIdioma(salvo);
+  } catch {
+    /* modo privado: segue o navegador ou o padrão */
+  }
+  return normalizarIdioma(parseAcceptLanguage(window.navigator.language));
+}
 
 /**
  * O idioma da interface, com contexto PRÓPRIO — não pendurado no de autenticação.
@@ -19,7 +33,7 @@ import { normalizarIdioma, IDIOMA_PADRAO, type Idioma } from "./idiomas";
  * mostra texto depender de quem sabe permissão. O provider de idioma recebe o
  * código pronto de quem já o tem (o layout) e não pergunta nada a ninguém.
  *
- * ─── Ausência é o padrão, nunca erro ───────────────────────────────────────
+ * ─── Ausência é o texto-fonte, nunca erro ──────────────────────────────────
  *
  * Sem provider, `t` devolve português. Um componente renderizado fora da árvore
  * — num teste, num e-mail, num fragmento isolado — continua mostrando texto
@@ -37,8 +51,11 @@ import { normalizarIdioma, IDIOMA_PADRAO, type Idioma } from "./idiomas";
  * essa reconciliação o estado local venceria para sempre e uma gravação que
  * FALHOU continuaria parecendo aplicada.
  */
+// Sem provider o texto é a chave. O padrão do produto entra só no provider montado.
+const IDIOMA_SEM_ARVORE: Idioma = "pt-BR";
+
 const Ctx = createContext<{ idioma: Idioma; aplicar: (i: Idioma) => void }>({
-  idioma: IDIOMA_PADRAO,
+  idioma: IDIOMA_SEM_ARVORE,
   aplicar: () => {},
 });
 
@@ -52,7 +69,7 @@ const Ctx = createContext<{ idioma: Idioma; aplicar: (i: Idioma) => void }>({
  * o valor aqui, num `useEffect`, é a única leitura possível de fora sem
  * inventar um segundo mecanismo de estado.
  */
-let idiomaFora: Idioma = IDIOMA_PADRAO;
+let idiomaFora: Idioma = IDIOMA_SEM_ARVORE;
 
 export function idiomaAtual(): Idioma {
   return idiomaFora;
@@ -79,8 +96,13 @@ export function IdiomaProvider({
   useEffect(() => {
     idiomaFora = idioma;
     document.documentElement.lang = idioma;
+    try {
+      window.localStorage.setItem(CHAVE_IDIOMA_LOCAL, idioma);
+    } catch {
+      /* sem armazenamento: o erro raiz cai no padrão */
+    }
     return () => {
-      idiomaFora = IDIOMA_PADRAO;
+      idiomaFora = IDIOMA_SEM_ARVORE;
     };
   }, [idioma]);
 

@@ -28,15 +28,6 @@ import { PROVEDOR_DO_JEV } from "@/lib/ai/decisao/credencial";
  * O MESMO formato da tela de Uso — as duas leem `llm_calls.cost_cents`, que é
  * centavo de DÓLAR (`pricing.ts` cota o provedor em USD).
  */
-const usd = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "USD",
-  // 6 casas porque uma execução isolada custa fração de centavo, e arredondar
-  // mostraria "US$ 0,00" — o zero que não é zero. Com 4, era o caso de TODA
-  // medição do Jev (~US$ 0,000016); o cartão dele já usava 6.
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 6,
-});
 
 interface Execucao {
   id: string;
@@ -68,6 +59,14 @@ interface Resumo {
 export function ExecucoesDeIa() {
   const tagDoIdioma = useTagDeIdioma();
   const t = useT();
+  // 6 casas porque uma execução isolada custa fração de centavo, e arredondar
+  // mostraria zero. A moeda continua USD; o agrupamento segue o Idioma.
+  const usd = new Intl.NumberFormat(tagDoIdioma, {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 6,
+  });
   const [execucoes, setExecucoes] = useState<Execucao[] | null>(null);
   const [resumo, setResumo] = useState<Resumo | null>(null);
   const [erro, setErro] = useState<string | null>(null);

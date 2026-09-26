@@ -1770,7 +1770,13 @@ describe("ExtensionsManager", () => {
     await screen.findByTestId(`extension-installed-${INSTALLATION}`);
 
     persistPendingReceipt(window.localStorage, ACTOR, ORG_A, RECEIPT);
-    const key = window.localStorage.key(0);
+    // A primeira chave pode ser o idioma da sessão (`deskcomm.idioma`), gravado
+    // pelo IdiomaProvider. O evento tem de nomear o recibo, como a aba vizinha faria.
+    let key = "";
+    for (let i = 0; i < window.localStorage.length; i += 1) {
+      const candidata = window.localStorage.key(i);
+      if (candidata?.endsWith(RECEIPT.id)) key = candidata;
+    }
     fireEvent(window, new StorageEvent("storage", { key }));
 
     expect(await screen.findByTestId(`extension-local-receipt-${RECEIPT.id}`)).toBeVisible();

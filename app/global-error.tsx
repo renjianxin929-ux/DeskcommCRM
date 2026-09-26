@@ -4,6 +4,9 @@ import * as Sentry from "@sentry/nextjs";
 import { useEffect, useState } from "react";
 
 import { copyToClipboard } from "@/lib/clipboard";
+import { traduzir } from "@/lib/i18n/dicionario";
+import { idiomaLembrado } from "@/lib/i18n/IdiomaProvider";
+import { IDIOMA_PADRAO, type Idioma } from "@/lib/i18n/idiomas";
 
 export default function GlobalError({
   error,
@@ -14,8 +17,15 @@ export default function GlobalError({
 }) {
   const [eventId, setEventId] = useState<string | undefined>(undefined);
   const [copied, setCopied] = useState(false);
+  // Primeira pintura é o padrão da instalação (zh-CN). Depois do mount, a
+  // preferência gravada pelo IdiomaProvider — ou o idioma do navegador — vence.
+  // Sem isto, a raiz do erro, que renderiza fora de qualquer provider, voltava
+  // ao português mesmo com a instalação em chinês.
+  const [idioma, setIdioma] = useState<Idioma>(IDIOMA_PADRAO);
+  const t = (texto: string) => traduzir(texto, idioma);
 
   useEffect(() => {
+    setIdioma(idiomaLembrado());
     const id = Sentry.captureException(error);
     setEventId(id);
   }, [error]);
@@ -23,7 +33,7 @@ export default function GlobalError({
   const displayId = eventId ?? error.digest ?? "—";
 
   return (
-    <html lang="pt-BR">
+    <html lang={idioma}>
       <body
         style={{
           margin: 0,
@@ -50,10 +60,10 @@ export default function GlobalError({
           }}
         >
           <h1 style={{ fontSize: "1.5rem", margin: "0 0 0.5rem", fontWeight: 600 }}>
-            Algo deu errado
+            {t("Algo deu errado")}
           </h1>
           <p style={{ color: "#57534e", margin: "0 0 1.5rem" }}>
-            Tente novamente em instantes. Se persistir, contate o suporte com o ID abaixo.
+            {t("Tente novamente em instantes. Se persistir, contate o suporte com o ID abaixo.")}
           </p>
           <div
             style={{
@@ -87,7 +97,7 @@ export default function GlobalError({
                 cursor: "pointer",
               }}
             >
-              {copied ? "Copiado!" : "Copiar ID"}
+              {copied ? t("Copiado!") : t("Copiar ID")}
             </button>
             <button
               type="button"
@@ -101,7 +111,7 @@ export default function GlobalError({
                 cursor: "pointer",
               }}
             >
-              Tentar de novo
+              {t("Tentar de novo")}
             </button>
           </div>
         </div>

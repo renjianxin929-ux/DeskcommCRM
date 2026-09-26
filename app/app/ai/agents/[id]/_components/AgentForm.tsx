@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import { TokenCounter } from "@/lib/ui/TokenCounter";
 import { Info } from "@/lib/ui/icons";
+import { useTagDeIdioma } from "@/hooks/i18n/useLocaleDeData";
 import { useT } from "@/hooks/i18n/useT";
 import Link from "next/link";
 
@@ -313,6 +314,7 @@ function toVersionPayload(s: FormState) {
 
 export function AgentForm(props: Props) {
   const t = useT();
+  const tagDoIdioma = useTagDeIdioma();
   const funis = props.funis ?? [];
   const materiais = props.materiais ?? [];
   const router = useRouter();
@@ -393,8 +395,8 @@ export function AgentForm(props: Props) {
     const tamanhoDoPrompt = form.system_prompt.trim().length;
     if (tamanhoDoPrompt > 20000)
       errors.system_prompt =
-        `${t("As instruções têm")} ${tamanhoDoPrompt.toLocaleString("pt-BR")} ${t("caracteres, e o máximo é 20.000. Corte")} ` +
-        `${(tamanhoDoPrompt - 20000).toLocaleString("pt-BR")} ${t("para conseguir salvar.")}`;
+        `${t("As instruções têm")} ${tamanhoDoPrompt.toLocaleString(tagDoIdioma)} ${t("caracteres, e o máximo é 20.000. Corte")} ` +
+        `${(tamanhoDoPrompt - 20000).toLocaleString(tagDoIdioma)} ${t("para conseguir salvar.")}`;
     if (!form.model) errors.model = t("Escolha o modelo de inteligência artificial.");
     if (!form.credential_id)
       errors.credential_id = t("Escolha a chave de acesso da empresa de inteligência artificial.");
@@ -1035,7 +1037,7 @@ export function AgentForm(props: Props) {
                       : "text-xs text-muted-foreground"
                   }
                 >
-                  {form.system_prompt.trim().length.toLocaleString("pt-BR")}/20.000
+                  {form.system_prompt.trim().length.toLocaleString(tagDoIdioma)}/20.000
                 </span>
                 <TokenCounter
                   text={form.system_prompt}

@@ -171,7 +171,7 @@ export OWNER_EMAIL="${OWNER_EMAIL:-admin@admin.com}"
 # exporta OWNER_PASSWORD antes de chamar o script.
 export OWNER_PASSWORD="${OWNER_PASSWORD:-$(openssl rand -base64 18)}"
 export OWNER_ORG_NAME="Deskcomm Local"
-export APP_LOCALE="pt-BR"
+export APP_LOCALE="zh-CN"
 
 # Instala a dependência para rodar o bootstrap e executa
 pnpm exec tsx scripts/bootstrap-owner.ts

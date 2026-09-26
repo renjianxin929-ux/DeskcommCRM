@@ -18,6 +18,7 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useTagDeIdioma } from "@/hooks/i18n/useLocaleDeData";
 import { useT } from "@/hooks/i18n/useT";
 import { formatCents } from "@/lib/money";
 
@@ -46,6 +47,7 @@ export function AtendimentosSemComanda({
   onFaturar: (corpo: { appointment_ids: string[]; payment_method_id: string }) => void;
 }) {
   const t = useT();
+  const tagDoIdioma = useTagDeIdioma();
   const [marcados, setMarcados] = useState<Set<string>>(new Set());
   const [formaId, setFormaId] = useState("");
 
@@ -90,7 +92,7 @@ export function AtendimentosSemComanda({
               <span className="flex-1">
                 {p.service_name ?? p.title}
                 <span className="ml-2 text-xs text-text-muted">
-                  {new Date(p.starts_at).toLocaleDateString()}
+                  {new Date(p.starts_at).toLocaleDateString(tagDoIdioma)}
                 </span>
               </span>
               <span className="tabular-nums">

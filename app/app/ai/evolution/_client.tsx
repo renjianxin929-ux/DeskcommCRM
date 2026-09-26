@@ -35,7 +35,6 @@ import { useT } from "@/hooks/i18n/useT";
  */
 
 // DÓLAR: `outcome.cost_cents` vem de `llm_calls`, que `pricing.ts` grava em centavo de USD.
-const usd = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "USD" });
 
 /**
  * O bloco se chama "o que MUDOU", mas o payload traz um período só — não há
@@ -88,11 +87,15 @@ const SIGNIFICA_AJUDA =
  * dos outros números do bloco, só que produzido pelo formatador. Exportada por
  * ser o único jeito de alcançar o ramo `< 0,1`: a org de prova não o produz.
  */
-export function taxaDeAjuda(rate: number, t: (texto: string) => string = (texto) => texto): string {
+export function taxaDeAjuda(
+  rate: number,
+  t: (texto: string) => string = (texto) => texto,
+  locale = "pt-BR",
+): string {
   if (rate <= 0) return "0";
   const porCem = rate * 100;
   if (porCem < 0.1) return t("menos de 0,1 a cada 100");
-  return `${porCem.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} ${t("a cada 100")}`;
+  return `${porCem.toLocaleString(locale, { maximumFractionDigits: 1 })} ${t("a cada 100")}`;
 }
 
 /**
@@ -123,8 +126,8 @@ export function descricaoResultado(
   return t(outcome.messages_received > 0 ? DESCRICAO_RESULTADO : DESCRICAO_RESULTADO_SEM_ATIVIDADE);
 }
 
-function num(n: number): string {
-  return n.toLocaleString("pt-BR");
+function num(n: number, locale: string): string {
+  return n.toLocaleString(locale);
 }
 
 function diaCurto(s: string, idioma: string): string {
@@ -235,7 +238,7 @@ function GraficoDiario({
       ) : (
         <>
           <p className="mt-3 text-2xl font-semibold tracking-tight">
-            {num(total)}{" "}
+            {num(total, tagDoIdioma)}{" "}
             <span className="text-xs font-normal text-text-muted">{t("no período")}</span>
           </p>
           <div className="mt-2">
@@ -258,7 +261,7 @@ function GraficoDiario({
                   width={36}
                 />
                 <Tooltip
-                  formatter={(v) => [num(Number(v)), t("no dia")]}
+                  formatter={(v) => [num(Number(v), tagDoIdioma), t("no dia")]}
                   labelFormatter={(l) => diaCurto(String(l), tagDoIdioma)}
                   contentStyle={{
                     borderRadius: "8px",
@@ -288,6 +291,7 @@ function Ranking({
   contagem: Record<string, number>;
   vazio: React.ReactNode;
 }) {
+  const tagDoIdioma = useTagDeIdioma();
   const linhas = Object.entries(contagem)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 8);
@@ -307,7 +311,7 @@ function Ranking({
                   {nome}
                 </span>
                 <span className="shrink-0 text-sm tabular-nums text-text-muted">
-                  {num(qtd)}
+                  {num(qtd, tagDoIdioma)}
                 </span>
               </div>
               <div className="h-1.5 w-full rounded-full bg-surface-elevated">
@@ -403,6 +407,8 @@ export function EvolutionClient({ defaultRange }: { defaultRange: { from: string
 
 function Conteudo({ payload }: { payload: NonNullable<ReturnType<typeof useEvolution>["data"]> }) {
   const t = useT();
+  const tagDoIdioma = useTagDeIdioma();
+  const usd = new Intl.NumberFormat(tagDoIdioma, { style: "currency", currency: "USD" });
   const { learned, activity, outcome, gaps } = payload;
 
   const soma = (s: Array<{ value: number }>) => s.reduce((a, p) => a + p.value, 0);
@@ -422,21 +428,21 @@ function Conteudo({ payload }: { payload: NonNullable<ReturnType<typeof useEvolu
         <div className="grid gap-3 sm:grid-cols-3">
           <StatCard
             rotulo={t("Regras que você ensinou")}
-            valor={num(learned.memory_entries)}
+            valor={num(learned.memory_entries, tagDoIdioma)}
             significa={t(
               "Instruções publicadas na Memória da IA. Valem para toda conversa, de todos os agentes.",
             )}
           />
           <StatCard
             rotulo={t("Melhorias que você aprovou")}
-            valor={num(learned.proposals_applied)}
+            valor={num(learned.proposals_applied, tagDoIdioma)}
             significa={t(
               "Sugestões que o sistema tirou dos próprios atendimentos e que você revisou e aceitou.",
             )}
           />
           <StatCard
             rotulo={t("Habilidades instaladas")}
-            valor={num(learned.skills_installed)}
+            valor={num(learned.skills_installed, tagDoIdioma)}
             significa={t(
               "Skills que o agente passou a carregar quando a conversa pede — por exemplo, fechar um agendamento.",
             )}
@@ -563,22 +569,22 @@ function Conteudo({ payload }: { payload: NonNullable<ReturnType<typeof useEvolu
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <StatCard
             rotulo={t("Negócios fechados pelo agente")}
-            valor={num(outcome.won)}
+            valor={num(outcome.won, tagDoIdioma)}
             significa={t(SIGNIFICA_GANHOS)}
           />
           <StatCard
             rotulo={t("Negócios perdidos pelo agente")}
-            valor={num(outcome.lost)}
+            valor={num(outcome.lost, tagDoIdioma)}
             significa={t(SIGNIFICA_PERDIDOS)}
           />
           <StatCard
             rotulo={t("Mudanças de passo no atendimento")}
-            valor={num(outcome.stage_transitions)}
+            valor={num(outcome.stage_transitions, tagDoIdioma)}
             significa={t(SIGNIFICA_MUDANCAS)}
           />
           <StatCard
             rotulo={t("Casos que precisaram de uma pessoa")}
-            valor={taxaDeAjuda(outcome.handoff_rate, t)}
+            valor={taxaDeAjuda(outcome.handoff_rate, t, tagDoIdioma)}
             significa={t(SIGNIFICA_AJUDA)}
           />
           <StatCard

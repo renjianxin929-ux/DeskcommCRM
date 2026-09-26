@@ -4,7 +4,7 @@ import { RoteirosDoContato } from "@/components/contacts/RoteirosDoContato";
 import { LeadEnrichment } from "./LeadEnrichment";
 import type { ProspectEnrichment } from "@/lib/prospecting/schema";
 import { useAuth } from "@/hooks/auth/AuthProvider";
-import { useLocaleDeData } from "@/hooks/i18n/useLocaleDeData";
+import { useLocaleDeData, useTagDeIdioma } from "@/hooks/i18n/useLocaleDeData";
 
 import type { Locale } from "date-fns";
 import Link from "next/link";
@@ -242,11 +242,11 @@ function MarcarProximoPasso({ demandaId, onPronto }: { demandaId: string; onPron
   );
 }
 
-function formatMoney(cents: number | null, currency: string | null): string {
+function formatMoney(cents: number | null, currency: string | null, locale: string): string {
   if (cents == null) return "—";
   const cur = currency ?? "BRL";
   try {
-    return new Intl.NumberFormat("pt-BR", { style: "currency", currency: cur }).format(
+    return new Intl.NumberFormat(locale, { style: "currency", currency: cur }).format(
       cents / 100,
     );
   } catch {
@@ -350,6 +350,7 @@ function InboxLeadEditor({
   onSalvo: () => void;
 }) {
   const t = useT();
+  const tagDoIdioma = useTagDeIdioma();
   const ativo = leads.find((l) => l.id === selecionadoId) ?? leads[0]!;
   const status = (l: LeadRow) => t(STATUS_DO_LEAD[l.status] ?? l.status);
 
@@ -376,7 +377,7 @@ function InboxLeadEditor({
                     {ondeEstaOLead(l)}
                   </div>
                   <div className="text-muted-foreground">
-                    {status(l)} · {formatMoney(l.value_cents, l.currency)}
+                    {status(l)} · {formatMoney(l.value_cents, l.currency, tagDoIdioma)}
                   </div>
                 </button>
               </li>
@@ -460,6 +461,7 @@ export function CRMSidePanel({ conversation }: Props) {
   const { user } = useAuth();
   const readonly = user.support?.access_mode === "support_readonly";
   const localeDaData = useLocaleDeData();
+  const tagDoIdioma = useTagDeIdioma();
   const t = useT();
   const contact = conversation?.contacts ?? null;
   const contactId = contact?.id ?? null;
@@ -806,7 +808,7 @@ export function CRMSidePanel({ conversation }: Props) {
                     {o.external_id ?? o.id.slice(0, 8)}
                   </div>
                   <div className="text-muted-foreground">
-                    {o.status ?? "—"} · {formatMoney(o.total_cents, o.currency)}
+                    {o.status ?? "—"} · {formatMoney(o.total_cents, o.currency, tagDoIdioma)}
                   </div>
                 </div>
               </li>

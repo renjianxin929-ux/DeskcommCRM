@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useTagDeIdioma } from "@/hooks/i18n/useLocaleDeData";
 import { useT } from "@/hooks/i18n/useT";
 import { rotuloDoIndicador } from "@/lib/plataformas-de-anuncio/meta/tabela-de-campanhas";
 import type { LinhaDeCampanha } from "@/lib/plataformas-de-anuncio/types";
@@ -60,10 +61,11 @@ const TOM_DO_ESTADO: Record<string, string> = {
 const TRACO = "—";
 
 function Numero({ valor, casas = 0 }: { valor: number | null; casas?: number }) {
+  const tagDoIdioma = useTagDeIdioma();
   if (valor === null) return <span className="text-muted-foreground">{TRACO}</span>;
   return (
     <>
-      {valor.toLocaleString("pt-BR", {
+      {valor.toLocaleString(tagDoIdioma, {
         minimumFractionDigits: casas,
         maximumFractionDigits: casas,
       })}
@@ -87,6 +89,7 @@ function Percentual({
    */
   titulo?: string;
 }) {
+  const tagDoIdioma = useTagDeIdioma();
   if (valor === null)
     return (
       <span className="text-muted-foreground" title={titulo}>
@@ -95,7 +98,7 @@ function Percentual({
     );
   return (
     <>
-      {valor.toLocaleString("pt-BR", {
+      {valor.toLocaleString(tagDoIdioma, {
         minimumFractionDigits: casas,
         maximumFractionDigits: casas,
       })}
@@ -127,6 +130,7 @@ interface Props {
 
 export function TabelaDeCampanhas({ linhas, moeda, avisos }: Props) {
   const t = useT();
+  const tagDoIdioma = useTagDeIdioma();
 
   /**
    * A ressalva da leitura, quando existe: é o `title` do "—" da coluna do
@@ -139,7 +143,7 @@ export function TabelaDeCampanhas({ linhas, moeda, avisos }: Props) {
     if (valor === null) return <span className="text-muted-foreground">{TRACO}</span>;
     return (
       <>
-        {valor.toLocaleString("pt-BR", {
+        {valor.toLocaleString(tagDoIdioma, {
           style: "currency",
           currency: moeda,
           minimumFractionDigits: casas,

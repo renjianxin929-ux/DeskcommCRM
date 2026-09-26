@@ -173,7 +173,7 @@ set_env_var "$app_env" SUPABASE_DB_URL "postgresql://postgres:${postgres_passwor
 set_env_var "$app_env" OWNER_EMAIL "$owner_email"
 set_env_var "$app_env" OWNER_PASSWORD "$owner_password"
 set_env_var "$app_env" APP_NAME DeskcommCRM
-set_env_var "$app_env" APP_LOCALE pt-BR
+set_env_var "$app_env" APP_LOCALE zh-CN
 # IA: nenhuma chave e gravada, entao ela nasce sem credencial (desligada) e o
 # fim do install.sh aponta o caminho em IA > Credenciais. Chaves NAO sao
 # zeradas: re-rodar este script nao pode apagar uma chave posta depois.

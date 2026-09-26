@@ -2,6 +2,7 @@
 import { useId, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api/client";
+import { useTagDeIdioma } from "@/hooks/i18n/useLocaleDeData";
 import { useT } from "@/hooks/i18n/useT";
 import { NewContactDialog } from "@/components/contacts/NewContactDialog";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,7 @@ export function VinculoDaMarcacao({
   onChange: (contact: string, conversation: string) => void;
 }) {
   const t = useT();
+  const tagDoIdioma = useTagDeIdioma();
   const listaId = useId();
   const [busca, setBusca] = useState("");
   const [aberto, setAberto] = useState(false);
@@ -178,7 +180,7 @@ export function VinculoDaMarcacao({
             <option value="">{t("Sem conversa vinculada")}</option>
             {ficha.data?.conversations.map((c, i) => (
               <option key={c.id} value={c.id}>
-                {t("Conversa")} {i + 1} · {new Date(c.created_at).toLocaleDateString()}
+                {t("Conversa")} {i + 1} · {new Date(c.created_at).toLocaleDateString(tagDoIdioma)}
               </option>
             ))}
           </select>

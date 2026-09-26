@@ -2106,7 +2106,7 @@ begin
     -- mais que uma resposta repetida no terminal.
     update public.organizations
        set locale = '${APP_LOCALE:-zh-CN}'
-     where id = v_org and coalesce(locale, 'pt-BR') = 'pt-BR';
+     where id = v_org and coalesce(locale, 'zh-CN') = 'zh-CN';
   end if;
   -- O provedor que a pessoa ESCOLHEU passa a valer no banco. O trigger
   -- fn_seed_org_llm_defaults semeia 'anthropic' fixo — o que estava certo

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import { useTagDeIdioma } from "@/hooks/i18n/useLocaleDeData";
 import { useT } from "@/hooks/i18n/useT";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ const STATUS_OPTIONS: Array<{ value: NonNullable<LeadFilters["status"]>; label: 
 
 export function FilterBar({ filters, onChange, leads }: FilterBarProps) {
   const t = useT();
+  const tagDoIdioma = useTagDeIdioma();
   const user = useUser();
   const { data: members } = useAssignableMembers(true);
   const { data: agents } = useAssignableAgents(true);
@@ -103,8 +105,8 @@ export function FilterBar({ filters, onChange, leads }: FilterBarProps) {
         version: a.version_number,
       })),
     ];
-    return rows.sort((x, y) => x.name.localeCompare(y.name, "pt-BR"));
-  }, [members, agents, user.id, t]);
+    return rows.sort((x, y) => x.name.localeCompare(y.name, tagDoIdioma));
+  }, [members, agents, user.id, t, tagDoIdioma]);
   const ownerLabel =
     filters.owner === "unassigned"
       ? t("Sem responsável")

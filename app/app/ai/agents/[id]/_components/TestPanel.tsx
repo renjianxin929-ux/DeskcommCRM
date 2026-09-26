@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { apiClient } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/types";
 import { agentRunsKey } from "@/hooks/ai/useAgentRuns";
+import { useTagDeIdioma } from "@/hooks/i18n/useLocaleDeData";
 import { useT } from "@/hooks/i18n/useT";
 import type { AgentRow } from "@/hooks/ai/useAgent";
 import type { AgentVersionRow } from "@/hooks/ai/useAgentVersions";
@@ -133,6 +134,7 @@ function Verificacoes({ g }: { g: NonNullable<TestResponse["data"]["guardrails"]
 
 export function TestPanel({ agent, draft, published, readOnly }: Props) {
   const t = useT();
+  const tagDoIdioma = useTagDeIdioma();
   const target = draft ?? published;
   const qc = useQueryClient();
 
@@ -293,8 +295,8 @@ export function TestPanel({ agent, draft, published, readOnly }: Props) {
                 {typeof result.latency_ms === "number" ? `${result.latency_ms}ms` : "—"}
               </Cell>
               <Cell label={t("Tokens in/out")}>
-                {result.tokens_in?.toLocaleString()??"—"} /{" "}
-                {result.tokens_out?.toLocaleString()??"—"}
+                {result.tokens_in?.toLocaleString(tagDoIdioma)??"—"} /{" "}
+                {result.tokens_out?.toLocaleString(tagDoIdioma)??"—"}
               </Cell>
               <Cell label={t("Custo (cents)")}>{result.cost_cents ?? "—"}</Cell>
             </div>

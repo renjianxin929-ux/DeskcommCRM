@@ -54,6 +54,17 @@ export interface IdiomaRegistrado {
 
 export const REGISTRO_DE_IDIOMAS = [
   {
+    codigo: "zh-CN",
+    nomeNativo: "简体中文",
+    rotuloCurto: "中",
+    tagBcp47: "zh-CN",
+    subtagsDoNavegador: ["zh"],
+    // Neste fork o padrão da instalação é chinês simplificado. pt-BR e es
+    // continuam servidos; quem não escolheu idioma cai aqui, não no português.
+    nivel: "completo",
+    mantenedor: "renjianxin929-ux",
+  },
+  {
     codigo: "pt-BR",
     nomeNativo: "Português (BR)",
     rotuloCurto: "PT",
@@ -72,17 +83,6 @@ export const REGISTRO_DE_IDIOMAS = [
     subtagsDoNavegador: ["es"],
     nivel: "completo",
     mantenedor: "mantenedores do projeto",
-  },
-  {
-    codigo: "zh-CN",
-    nomeNativo: "简体中文",
-    rotuloCurto: "中",
-    tagBcp47: "zh-CN",
-    subtagsDoNavegador: ["zh"],
-    // O fork chinês promove este catálogo a idioma servido. Novas telas devem
-    // manter o zh-CN completo junto do espanhol antes de entrar em produção.
-    nivel: "completo",
-    mantenedor: "renjianxin929-ux",
   },
 ] as const satisfies readonly IdiomaRegistrado[];
 

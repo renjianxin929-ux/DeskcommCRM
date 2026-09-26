@@ -31,6 +31,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useTagDeIdioma } from "@/hooks/i18n/useLocaleDeData";
 import { useT } from "@/hooks/i18n/useT";
 
 import type { AgentVersionRow } from "@/hooks/ai/useAgentVersions";
@@ -79,6 +80,7 @@ function pickCounterpart(
 
 export function VersionHistory({ agentId, versions, readOnly }: Props) {
   const t = useT();
+  const tagDoIdioma = useTagDeIdioma();
   const router = useRouter();
   const [diffOpen, setDiffOpen] = React.useState(false);
   const [diffPair, setDiffPair] = React.useState<{
@@ -149,14 +151,14 @@ export function VersionHistory({ agentId, versions, readOnly }: Props) {
               </Badge>
               <span className="font-mono">v{v.version_number}</span>
               <span className="text-xs text-muted-foreground">
-                {new Date(v.created_at).toLocaleString()}
+                {new Date(v.created_at).toLocaleString(tagDoIdioma)}
               </span>
               <span className="font-mono text-xs text-muted-foreground">
                 {v.provider}/{v.model}
               </span>
               {v.published_at ? (
                 <span className="text-xs text-muted-foreground">
-                  {t("publicada em")} {new Date(v.published_at).toLocaleString()}
+                  {t("publicada em")} {new Date(v.published_at).toLocaleString(tagDoIdioma)}
                 </span>
               ) : null}
               <div className="ml-auto flex gap-2">

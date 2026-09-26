@@ -29,6 +29,7 @@ import { useState } from "react";
 
 import { showApiError } from "@/components/feedback/ApiErrorToast";
 import { Button } from "@/components/ui/button";
+import { useTagDeIdioma } from "@/hooks/i18n/useLocaleDeData";
 import { useT } from "@/hooks/i18n/useT";
 import { apiClient } from "@/lib/api/client";
 
@@ -84,6 +85,7 @@ function emMinutos(hhmm: string): number {
 
 export function DiasBloqueados({ podeEditar }: { podeEditar: boolean }) {
   const t = useT();
+  const tagDoIdioma = useTagDeIdioma();
   const qc = useQueryClient();
   const [data, setData] = useState("");
   const [motivo, setMotivo] = useState("");
@@ -284,7 +286,7 @@ export function DiasBloqueados({ podeEditar }: { podeEditar: boolean }) {
           {lista.map((e) => (
             <li key={e.id} className="flex items-center justify-between gap-2 text-sm">
               <span>
-                {new Date(`${e.exception_date}T12:00:00`).toLocaleDateString()} · {faixa(e, t)}
+                {new Date(`${e.exception_date}T12:00:00`).toLocaleDateString(tagDoIdioma)} · {faixa(e, t)}
                 {e.is_unavailable ? "" : ` · ${t("aberto excepcionalmente")}`}
                 {e.reason ? ` · ${e.reason}` : ""}
               </span>

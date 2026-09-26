@@ -6,6 +6,7 @@ import { useAiUsage, type AiUsageFilters } from "@/hooks/ai/useAiUsage";
 import { UsageFilters, type UsageFiltersAgent } from "@/components/ai/UsageFilters";
 import { UsageChart } from "@/components/ai/UsageChart";
 import { formatCentsUSD } from "@/lib/money";
+import { useTagDeIdioma } from "@/hooks/i18n/useLocaleDeData";
 import { useT } from "@/hooks/i18n/useT";
 
 interface Props {
@@ -64,6 +65,7 @@ function ChartSkeletons() {
 
 export function UsageDashboardClient({ agents, initial }: Props) {
   const t = useT();
+  const tagDoIdioma = useTagDeIdioma();
   const searchParams = useSearchParams();
 
   const filters: AiUsageFilters = {
@@ -95,7 +97,7 @@ export function UsageDashboardClient({ agents, initial }: Props) {
             />
             <StatCard
               label={t("Atendimentos com IA")}
-              value={q.data.totals.invocations.toLocaleString("pt-BR")}
+              value={q.data.totals.invocations.toLocaleString(tagDoIdioma)}
             />
             <StatCard
               label={t("Passaram para uma pessoa")}
@@ -110,12 +112,12 @@ export function UsageDashboardClient({ agents, initial }: Props) {
             */}
             <StatCard
               label={t("Tempo de resposta")}
-              value={`${(q.data.totals.p95_latency_ms / 1000).toLocaleString("pt-BR", {
+              value={`${(q.data.totals.p95_latency_ms / 1000).toLocaleString(tagDoIdioma, {
                 maximumFractionDigits: 1,
               })} s`}
               hint={`${t("a maioria responde em")} ${(
                 q.data.totals.p50_latency_ms / 1000
-              ).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} s; ${t("este é o pior caso comum")}`}
+              ).toLocaleString(tagDoIdioma, { maximumFractionDigits: 1 })} s; ${t("este é o pior caso comum")}`}
             />
           </div>
 

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import { useTagDeIdioma } from "@/hooks/i18n/useLocaleDeData";
 import { useT } from "@/hooks/i18n/useT";
 
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ interface Props {
 /** Preview antes do envio (padrão WhatsApp): thumb ou card + legenda. */
 export function AttachmentPreviewDialog({ file, sending, onCancel, onSend }: Props) {
   const t = useT();
+  const tagDoIdioma = useTagDeIdioma();
   const [caption, setCaption] = useState("");
   useEffect(() => setCaption(""), [file]);
 
@@ -46,7 +48,7 @@ export function AttachmentPreviewDialog({ file, sending, onCancel, onSend }: Pro
               <FileText size={28} weight="duotone" className="text-primary" aria-hidden />
               <div className="text-sm">
                 <p className="font-medium">{file.name}</p>
-                <p className="text-xs text-muted-foreground">{formatBytes(file.size)}</p>
+                <p className="text-xs text-muted-foreground">{formatBytes(file.size, tagDoIdioma)}</p>
               </div>
             </div>
           )}

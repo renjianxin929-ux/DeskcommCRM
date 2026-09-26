@@ -13,6 +13,7 @@ import { ChartBar } from "@/lib/ui/icons";
 import type { UsageTenantRow } from "@/app/api/v1/admin/usage/route";
 import type { UsageRange } from "@/hooks/useAdminUsage";
 import { formatCentsUSD } from "@/lib/money";
+import { useTagDeIdioma } from "@/hooks/i18n/useLocaleDeData";
 import { useT } from "@/hooks/i18n/useT";
 
 // ---------------------------------------------------------------------------
@@ -22,8 +23,8 @@ import { useT } from "@/hooks/i18n/useT";
 // DÓLAR: o número é `llm_calls.cost_cents`, e `pricing.ts` cota o provedor em USD.
 const fmtUSD = formatCentsUSD;
 
-function fmtNum(n: number): string {
-  return n.toLocaleString("pt-BR");
+function fmtNum(n: number, locale: string): string {
+  return n.toLocaleString(locale);
 }
 
 // ---------------------------------------------------------------------------
@@ -76,6 +77,7 @@ interface UsageTableProps {
 
 export function UsageTable({ tenants, range }: UsageTableProps) {
   const t = useT();
+  const tagDoIdioma = useTagDeIdioma();
   if (tenants.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 rounded-md border py-16 text-center text-muted-foreground">
@@ -132,16 +134,16 @@ export function UsageTable({ tenants, range }: UsageTableProps) {
                   )}
                 </TableCell>
                 <TableCell className="text-right text-sm tabular-nums">
-                  {fmtNum(row.messages_count)}
+                  {fmtNum(row.messages_count, tagDoIdioma)}
                 </TableCell>
                 <TableCell className="text-right text-sm tabular-nums">
-                  {fmtNum(row.conversations_count)}
+                  {fmtNum(row.conversations_count, tagDoIdioma)}
                 </TableCell>
                 <TableCell className="text-right text-sm tabular-nums">
-                  {fmtNum(row.ai_invocations_count)}
+                  {fmtNum(row.ai_invocations_count, tagDoIdioma)}
                 </TableCell>
                 <TableCell className="text-right text-sm tabular-nums">
-                  {fmtNum(row.ai_tokens_total)}
+                  {fmtNum(row.ai_tokens_total, tagDoIdioma)}
                 </TableCell>
                 <TableCell className="text-right text-sm font-medium tabular-nums">
                   {fmtUSD(row.ai_cost_cents)}

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/table";
 import { useCatalogoExterno, type TabelaExterna } from "@/hooks/external-db/useCatalogoExterno";
 import { useDadosExternos } from "@/hooks/external-db/useDadosExternos";
+import { useTagDeIdioma } from "@/hooks/i18n/useLocaleDeData";
 import { useT } from "@/hooks/i18n/useT";
 import { cn } from "@/lib/utils";
 import { CaretDown, CaretLeft, CaretRight, CaretUp, CircleNotch } from "@/lib/ui/icons";
@@ -80,6 +81,7 @@ function lerMedidas(chave: string | null): Medidas {
 
 export function ExploradorDeDados({ connectionId }: Props) {
   const t = useT();
+  const tagDoIdioma = useTagDeIdioma();
   const catalogo = useCatalogoExterno(connectionId);
 
   const [selecionada, setSelecionada] = useState<TabelaExterna | null>(null);
@@ -341,7 +343,7 @@ export function ExploradorDeDados({ connectionId }: Props) {
                   {selecionada.schema}.{selecionada.nome}
                 </span>
                 <span className="text-muted-foreground">
-                  ~{selecionada.estimativaLinhas.toLocaleString()} {t("linhas (estimativa)")}
+                  ~{selecionada.estimativaLinhas.toLocaleString(tagDoIdioma)} {t("linhas (estimativa)")}
                 </span>
               </div>
               <div className="flex items-center gap-2">
