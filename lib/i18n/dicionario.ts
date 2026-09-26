@@ -32,6 +32,7 @@
  * do que estava.
  */
 import type { Idioma } from "./idiomas";
+import chines from "./traducoes/zh-CN.json";
 
 /** `pt-BR` não aparece: é a chave. Só o que DIFERE precisa de linha. */
 type Traducoes = Record<string, Partial<Record<Exclude<Idioma, "pt-BR">, string>>>;
@@ -12191,6 +12192,15 @@ export const DICIONARIO: Traducoes = {
     { es: "Comandos desde el celular activados — ya valen en la próxima atención." },
   "Comandos pelo celular desligados.": { es: "Comandos desde el celular desactivados." },
 };
+
+// O catálogo chinês vive separado para continuar revisável como dados. Neste
+// fork ele é um idioma servido: anexamos a coluna zh-CN ao dicionário canônico
+// uma vez no carregamento do módulo. Chaves antigas órfãs são ignoradas; toda
+// chave de UI vigente é cobrada pelos testes de completude.
+for (const [texto, traducao] of Object.entries(chines)) {
+  const entrada = DICIONARIO[texto];
+  if (entrada) entrada["zh-CN"] = traducao;
+}
 
 /**
  * Traduz, ou devolve o próprio texto.
