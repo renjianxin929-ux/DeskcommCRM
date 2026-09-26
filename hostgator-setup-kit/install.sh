@@ -238,11 +238,10 @@ v_hex() {
 # Aceita o código e o número da opção, porque quem lê "1) Português" digita "1".
 v_locale() {
   case "$1" in
-    ''|pt-BR|es) return 0;;
-    1) return 0;;
-    2) return 0;;
+    ''|pt-BR|es|zh-CN) return 0;;
+    1|2|3) return 0;;
   esac
-  echo "$(t "Escolha 1 (Português) ou 2 (Español) — ou Enter para Português")"
+  echo "$(t "Escolha 1 (Português), 2 (Español) ou 3 (简体中文) — ou Enter para 简体中文")"
   return 1
 }
 
@@ -1297,7 +1296,7 @@ FIELDS=(
   # Idioma da instalação. Fica JUNTO do nome do produto de propósito: as duas
   # perguntas são "como o sistema se apresenta", e separá-las faria a segunda
   # parecer configuração técnica.
-  "APP_LOCALE|Idioma do sistema — 1) Português  2) Español (Enter = Português)|1|v_locale||"
+  "APP_LOCALE|Idioma do sistema — 1) Português  2) Español  3) 简体中文 (Enter = 简体中文)|3|v_locale||"
   # Sem default, e `opcional`: em `--yes` o `ask_one` devolve 0 sem associar a
   # variável (campo sem default e sem `opcional` morre em `die`), e o `envq` lá
   # embaixo usa `${APP_ACCENT_HEX:-}`. Enter = a cor do produto, que é o
@@ -1645,12 +1644,14 @@ esac
   printf '# Supabase quem empurra é o marca-emails.sh, lendo daqui, e o banco não alcança;\n'
   printf '# num Supabase PRÓPRIO o GoTrue busca /email-templates/ do app, que resolve a\n'
   printf '# marca pelo banco — e aí trocar em Configurações > Marca chega ao e-mail.\n'
-  # Normaliza a escolha do idioma ANTES de gravar: o campo aceita "1"/"2"
+  # Normaliza a escolha do idioma ANTES de gravar: o campo aceita "1"/"2"/"3"
   # porque é o que se digita lendo um menu numerado, mas quem lê o `.env` — o
   # bootstrap, o SQL abaixo, um operador conferindo — precisa do código.
   case "${APP_LOCALE:-}" in
-    2|es) APP_LOCALE="es";;
-    *)    APP_LOCALE="pt-BR";;
+    1|pt-BR) APP_LOCALE="pt-BR";;
+    2|es)    APP_LOCALE="es";;
+    3|zh-CN|"") APP_LOCALE="zh-CN";;
+    *)       APP_LOCALE="zh-CN";;
   esac
   envq APP_NAME "$APP_NAME"
   envq APP_LOCALE "$APP_LOCALE"
@@ -2071,7 +2072,7 @@ curl -fsS -X POST "${SUPABASE_INTERNAL_URL:-${NEXT_PUBLIC_SUPABASE_URL}}/auth/v1
   -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
   -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
   -H "Content-Type: application/json" \
-  -d "{\"email\":\"${OWNER_EMAIL}\",\"password\":\"${OWNER_PASSWORD}\",\"email_confirm\":true,\"user_metadata\":{\"locale\":\"${APP_LOCALE:-pt-BR}\"}}" \
+  -d "{\"email\":\"${OWNER_EMAIL}\",\"password\":\"${OWNER_PASSWORD}\",\"email_confirm\":true,\"user_metadata\":{\"locale\":\"${APP_LOCALE:-zh-CN}\"}}" \
   >/dev/null 2>&1 || true
 
 # 2) Resolve o id direto do auth.users e cria org + membership + platform_admin.
@@ -2096,7 +2097,7 @@ begin
     -- própria cai neste valor, então gravar só no dono entregaria o sistema em
     -- português para todo mundo que ele convidasse numa instalação em espanhol.
     insert into public.organizations (slug, display_name, legal_name, locale, created_by)
-    values ('minha-empresa','Minha Empresa','Minha Empresa','${APP_LOCALE:-pt-BR}', v_uid)
+    values ('minha-empresa','Minha Empresa','Minha Empresa','${APP_LOCALE:-zh-CN}', v_uid)
     returning id into v_org;
   else
     -- Re-execução do instalador com outra resposta: quem rodou de novo para
@@ -2104,7 +2105,7 @@ begin
     -- estiver no padrão — se alguém já escolheu pela tela, a escolha dela vale
     -- mais que uma resposta repetida no terminal.
     update public.organizations
-       set locale = '${APP_LOCALE:-pt-BR}'
+       set locale = '${APP_LOCALE:-zh-CN}'
      where id = v_org and coalesce(locale, 'pt-BR') = 'pt-BR';
   end if;
   -- O provedor que a pessoa ESCOLHEU passa a valer no banco. O trigger
