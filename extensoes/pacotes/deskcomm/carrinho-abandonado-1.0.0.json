@@ -20,11 +20,13 @@
   "display": {
     "title": {
       "pt-BR": "Carrinho abandonado",
-      "es": "Carrito abandonado"
+      "es": "Carrito abandonado",
+      "zh-CN": "弃购购物车"
     },
     "summary": {
       "pt-BR": "O roteiro de quem chegou até o pagamento e parou: o que perguntar, quando insistir e quando deixar quieto.",
-      "es": "El guion de quien llegó al pago y se detuvo: qué preguntar, cuándo insistir y cuándo dejarlo."
+      "es": "El guion de quien llegó al pago y se detuvo: qué preguntar, cuándo insistir y cuándo dejarlo.",
+      "zh-CN": "写给已经走到付款又停下的人：该问什么、何时再跟一次、何时停止。"
     },
     "category": "sales",
     "icon": "Lightbulb"
@@ -39,39 +41,46 @@
         "id": "primeira-mensagem",
         "title": {
           "pt-BR": "A primeira mensagem, em até 1 hora",
-          "es": "El primer mensaje, en hasta 1 hora"
+          "es": "El primer mensaje, en hasta 1 hora",
+          "zh-CN": "第一条消息，尽量在 1 小时内发出"
         },
         "description": {
           "pt-BR": "Quem abandonou o carrinho ainda lembra do que estava comprando. Depois de um dia, virou outra pessoa e outro assunto.",
-          "es": "Quien abandonó el carrito todavía recuerda qué estaba comprando."
+          "es": "Quien abandonó el carrito todavía recuerda qué estaba comprando.",
+          "zh-CN": "弃购的人这时还记得自己在买什么。过了一天，就是另一个人和另一件事了。"
         },
         "icon": "Lightbulb",
         "blocks": [
           {
             "heading": {
               "pt-BR": "Pergunte o obstáculo, não o pedido",
-              "es": "Pregunte el obstáculo, no el pedido"
+              "es": "Pregunte el obstáculo, no el pedido",
+              "zh-CN": "问的是障碍，不是再要一次订单"
             },
             "body": {
               "pt-BR": "\"Vi que você estava fechando o pedido do [produto] e travou. Foi o frete, a forma de pagamento, ou ficou alguma dúvida?\" — três saídas concretas são mais fáceis de responder que \"posso ajudar?\", que só aceita sim ou não.",
-              "es": "\"Vi que estabas cerrando el pedido y se detuvo. ¿Fue el envío, el pago o quedó alguna duda?\""
+              "es": "\"Vi que estabas cerrando el pedido y se detuvo. ¿Fue el envío, el pago o quedó alguna duda?\"",
+              "zh-CN": "“我看到你正在结算 [produto]，停住了。是运费、付款方式，还是还有疑问？”——给出三个具体出口，比只会得到是或否的“需要帮忙吗？”更容易回复。"
             }
           },
           {
             "heading": {
               "pt-BR": "Não ofereça desconto na primeira",
-              "es": "No ofrezca descuento en el primero"
+              "es": "No ofrezca descuento en el primero",
+              "zh-CN": "第一条消息不要给折扣"
             },
             "body": {
               "pt-BR": "A maioria para por dúvida de prazo ou de frete, não por preço. Quem dá desconto de largada ensina o cliente a abandonar o carrinho de propósito na próxima compra.",
-              "es": "La mayoría se detiene por duda de plazo o envío, no por precio."
+              "es": "La mayoría se detiene por duda de plazo o envío, no por precio.",
+              "zh-CN": "大多数人停下是因为交货时间或运费有疑问，不是因为价格。一上来就打折，等于教客户下次故意弃购。"
             }
           }
         ],
         "action": {
           "label": {
             "pt-BR": "Abrir as conversas",
-            "es": "Abrir las conversaciones"
+            "es": "Abrir las conversaciones",
+            "zh-CN": "打开会话"
           },
           "capability": "inbox.open"
         }
@@ -80,29 +89,34 @@
         "id": "quando-parar",
         "title": {
           "pt-BR": "Quando parar de insistir",
-          "es": "Cuándo dejar de insistir"
+          "es": "Cuándo dejar de insistir",
+          "zh-CN": "何时停止跟进"
         },
         "description": {
           "pt-BR": "Duas tentativas sem resposta é informação, não silêncio: mova o negócio e libere o funil para quem está respondendo.",
-          "es": "Dos intentos sin respuesta son información, no silencio."
+          "es": "Dos intentos sin respuesta son información, no silencio.",
+          "zh-CN": "两次尝试都没有回复，这是信息，不是沉默：把商机移走，把漏斗留给正在回复的人。"
         },
         "icon": "ListChecks",
         "blocks": [
           {
             "heading": {
               "pt-BR": "Duas tentativas, depois mova",
-              "es": "Dos intentos, después mueva"
+              "es": "Dos intentos, después mueva",
+              "zh-CN": "两次尝试，然后移走"
             },
             "body": {
               "pt-BR": "Primeira em 1 hora, segunda no dia seguinte. Sem resposta nas duas, mova para a etapa de perda com o motivo real — sem motivo, o funil vira uma lista de nomes que ninguém sabe por que estão ali.",
-              "es": "Primero en 1 hora, segundo al día siguiente. Sin respuesta, mueva a la etapa de pérdida con el motivo real."
+              "es": "Primero en 1 hora, segundo al día siguiente. Sin respuesta, mueva a la etapa de pérdida con el motivo real.",
+              "zh-CN": "第一次在 1 小时内，第二次在第二天。两次都没有回复，就移到输单阶段并写下真实原因——没有原因，漏斗就变成一串没人知道为何在那里的名字。"
             }
           }
         ],
         "action": {
           "label": {
             "pt-BR": "Abrir o funil",
-            "es": "Abrir el embudo"
+            "es": "Abrir el embudo",
+            "zh-CN": "打开销售漏斗"
           },
           "capability": "kanban.open"
         }

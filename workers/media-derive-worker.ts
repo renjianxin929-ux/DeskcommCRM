@@ -19,11 +19,24 @@ import { TIPOS_DERIVAVEIS } from "@/lib/messaging/media/derivable";
 import { deriveVideoText } from "@/lib/messaging/media/video-derive";
 import { apiTranscriptionProvider } from "@/lib/messaging/media/transcription";
 import { logger } from "@/lib/logger";
+import { idiomaDaOrganizacao } from "@/lib/i18n/idioma-da-org";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { motivoDaRecusaDeDestino } from "@/lib/automation/destinos-internos-autorizados";
 import { DETALHE_TECNICO } from "@/lib/event-log/aviso-de-evento-morto";
 
 export const MEDIA_DERIVE_CONSUMER_KEY = "media_derive_v1";
+
+/** A descrição da imagem segue o idioma da organização, não um idioma fixo. */
+async function pedidoDeImagem(orgId: string): Promise<string> {
+  const idioma = await idiomaDaOrganizacao(createAdminClient(), orgId);
+  if (idioma === "zh-CN") {
+    return "请用简体中文，用 1 到 2 句客观描述这张图片，让销售客服明白客户发来了什么。";
+  }
+  if (idioma === "es") {
+    return "Describe objetivamente esta imagen en 1 o 2 frases, en español, para que un asesor de ventas entienda lo que envió el cliente.";
+  }
+  return "Descreva objetivamente esta imagem em 1-2 frases, em português, para um atendente de vendas entender o que o cliente enviou.";
+}
 const DRAIN_MAX_ATTEMPTS = 5; // espelho de lib/event-log/drain.ts
 
 // Lista compartilhada com o drain do turno — ver lib/messaging/media/derivable.ts.
@@ -449,7 +462,7 @@ function buildDeriveDeps(
         {
           role: "user",
           content: [
-            { type: "text", text: "Descreva objetivamente esta imagem em 1-2 frases, em português, para um atendente de vendas entender o que o cliente enviou." },
+            { type: "text", text: await pedidoDeImagem(orgId) },
             // AI SDK v7: file part com mediaType (o antigo image part é deprecated).
             { type: "file", data: buffer, mediaType: mime.split(";")[0]! },
           ],

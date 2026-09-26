@@ -69,6 +69,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { nomeDoContato } from "@/lib/contacts/rotulo-do-contato";
 import { conversasVisiveisDosCasos } from "@/lib/escalacao/chamados";
 import { traduzir } from "@/lib/i18n/dicionario";
+import type { Idioma } from "@/lib/i18n/idiomas";
 import { requireSupportWrite } from "@/lib/impersonate/support";
 import { logger } from "@/lib/logger";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -114,6 +115,7 @@ interface ContextoDaRota {
   requestId: string;
   orgId: string;
   userId: string;
+  idioma: Idioma;
   t: (texto: string) => string;
   caseId: string;
   db: Awaited<ReturnType<typeof createClient>>;
@@ -157,7 +159,7 @@ async function contexto(ctx: Ctx, requestId: string): Promise<{ response: Respon
     return { response: fail("not_found", t("Caso não encontrado."), 404, { requestId }) };
   }
 
-  return { requestId, orgId: authz.org.orgId, userId: authz.user.id, t, caseId, db };
+  return { requestId, orgId: authz.org.orgId, userId: authz.user.id, idioma: authz.user.idioma, t, caseId, db };
 }
 
 /** A persona de AGORA, recalculada a cada requisição (a coluna é histórico). */
@@ -473,6 +475,7 @@ export async function POST(req: NextRequest, ctx: Ctx): Promise<Response> {
   const system = montarSystem({
     persona: persona.fonte === "agente_do_caso" ? persona.agente.systemPrompt : PERSONA_NEUTRA,
     memoriaDaOrganizacao: renderOrgMemory(orgMemory) || null,
+    idioma: c.idioma,
   });
 
   let erroCodigo: string | null = null;

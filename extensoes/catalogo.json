@@ -14,11 +14,13 @@
       "display": {
         "title": {
           "pt-BR": "Carrinho abandonado",
-          "es": "Carrito abandonado"
+          "es": "Carrito abandonado",
+          "zh-CN": "弃购购物车"
         },
         "summary": {
           "pt-BR": "O roteiro de quem chegou até o pagamento e parou: o que perguntar, quando insistir e quando deixar quieto.",
-          "es": "El guion de quien llegó al pago y se detuvo: qué preguntar, cuándo insistir y cuándo dejarlo."
+          "es": "El guion de quien llegó al pago y se detuvo: qué preguntar, cuándo insistir y cuándo dejarlo.",
+          "zh-CN": "写给已经走到付款又停下的人：该问什么、何时再跟一次、何时停止。"
         },
         "category": "sales",
         "icon": "Lightbulb"
@@ -27,8 +29,8 @@
         "navigation.inbox",
         "navigation.kanban"
       ],
-      "sha256": "54e78e246a2c7a9e788cfafe4347c66e7bd38e30a5daf80c6515a177acd94174",
-      "byte_length": 3928,
+      "sha256": "d1abb8b226b0394acf9dfe02cb31ee731ea438e0a9c666c3f40643b4537a3a88",
+      "byte_length": 5327,
       "publisher_label": "Deskcomm",
       "repository": "https://github.com/melgarafael/DeskcommCRM",
       "tags": [
@@ -50,11 +52,13 @@
       "display": {
         "title": {
           "pt-BR": "Primeira semana no atendimento",
-          "es": "Primera semana en atención"
+          "es": "Primera semana en atención",
+          "zh-CN": "接待的第一周"
         },
         "summary": {
           "pt-BR": "O que alguém que entrou hoje precisa fazer nos primeiros cinco dias para atender sozinho sem quebrar nada.",
-          "es": "Lo que alguien que entró hoy necesita hacer en los primeros cinco días."
+          "es": "Lo que alguien que entró hoy necesita hacer en los primeros cinco días.",
+          "zh-CN": "今天才进来的人，在头五天需要做些什么，才能自己接待而不把事情弄乱。"
         },
         "category": "productivity",
         "icon": "BookOpen"
@@ -63,8 +67,8 @@
         "navigation.tasks",
         "navigation.contacts"
       ],
-      "sha256": "a501e34fbeee4dbe5beaee0249f6440602edee1975638f0c4ad69480903ba4ad",
-      "byte_length": 3323,
+      "sha256": "d39f6c8e7dac85a8a2f881f7e14e8d63e9b2330eb299b5221b57bd1337dfd75c",
+      "byte_length": 4451,
       "publisher_label": "Deskcomm",
       "repository": "https://github.com/melgarafael/DeskcommCRM",
       "tags": [
@@ -85,11 +89,13 @@
       "display": {
         "title": {
           "pt-BR": "Retorno de paciente",
-          "es": "Retorno del paciente"
+          "es": "Retorno del paciente",
+          "zh-CN": "患者复诊"
         },
         "summary": {
           "pt-BR": "Duas rotinas curtas para a recepção não perder quem tratou e não remarcou: quem falar hoje e quais encaixes a semana ainda tem.",
-          "es": "Dos rutinas cortas para que la recepción no pierda a quien se trató y no volvió a agendar."
+          "es": "Dos rutinas cortas para que la recepción no pierda a quien se trató y no volvió a agendar.",
+          "zh-CN": "前台用的两段短流程，避免弄丢已经看过诊却没有再预约的人：今天该联系谁，以及这周还剩哪些空档。"
         },
         "category": "service",
         "icon": "ListChecks"
@@ -98,8 +104,8 @@
         "navigation.inbox",
         "navigation.agenda"
       ],
-      "sha256": "fb65a77b8420899b16b059ffd954b597864df23b2f1827bcd11913e56f56cc3e",
-      "byte_length": 3523,
+      "sha256": "8c16f344511787f790480ca5cfe04d5a614219cc943f2ea66b1379511fa6ab03",
+      "byte_length": 4903,
       "publisher_label": "Deskcomm",
       "repository": "https://github.com/melgarafael/DeskcommCRM",
       "tags": [
@@ -110,5 +116,5 @@
       "published_at": "2026-09-18"
     }
   ],
-  "revision": 1
+  "revision": 2
 }

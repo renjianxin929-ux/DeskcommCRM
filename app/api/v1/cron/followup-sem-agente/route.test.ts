@@ -54,6 +54,15 @@ function admin(opts: {
   const { ponteiros, followupPorOrg = {}, avisoAbertoDe = new Set<string>(), versoes = [], cap } = opts;
   return {
     from(tabela: string) {
+      if (tabela === "organizations") {
+        return {
+          select: () => ({
+            eq: () => ({
+              maybeSingle: async () => ({ data: { locale: "pt-BR" }, error: null }),
+            }),
+          }),
+        };
+      }
       if (tabela === "followup_flow_pointers") {
         return {
           select: () => ({

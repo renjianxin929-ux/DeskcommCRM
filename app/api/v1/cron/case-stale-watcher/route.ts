@@ -51,6 +51,7 @@ import type { NextRequest } from "next/server";
 
 import { ok, fail } from "@/lib/api/wrappers";
 import { audit } from "@/lib/audit";
+import { copiar } from "@/lib/i18n/copiar";
 import { traduzir } from "@/lib/i18n/dicionario";
 import { normalizarIdioma, type Idioma } from "@/lib/i18n/idiomas";
 import { logger } from "@/lib/logger";
@@ -75,24 +76,15 @@ const TETO_DE_COBRANCAS = 3;
 /** Teto por rodada. Roda de hora em hora; sobra volta na seguinte. */
 const LIMITE_DA_VARREDURA = 200;
 
-function comoFaz(horas: number): string {
-  const dias = Math.floor(horas / 24);
-  if (dias >= 1) return dias === 1 ? "há um dia" : `há ${dias} dias`;
-  return `há ${Math.max(1, Math.round(horas))} horas`;
-}
-
 /**
- * O MESMO "há N dias", mas montado a partir de PEDAÇOS TRADUZÍVEIS.
+ * "há N dias", montado a partir de PEDAÇOS TRADUZÍVEIS.
  *
- * `comoFaz` devolve a frase inteira já interpolada — `t("há 2 dias")` não casa
- * chave nenhuma no dicionário e devolveria o português para quem escolheu
- * espanhol, em silêncio, que é o modo de falha de i18n que esta casa já pagou.
- * Aqui o número fica fora da tradução e só as palavras passam por `t()`.
+ * A frase inteira já interpolada — `t("há 2 dias")` — não casa chave nenhuma
+ * no dicionário e devolveria o português para quem escolheu outro idioma.
+ * O número fica fora da tradução e só as palavras passam por `t()`.
  *
- * ⚠️ O braço dos CASOS continua usando `comoFaz` e continua saindo em português
- * para toda organização. É dívida ANTERIOR a esta onda e está declarada, não
- * consertada de carona: mudar o título daquele aviso mexeria num texto que
- * `central-avisos-*` já observa, e o lugar de decidir isso é o PR daquele braço.
+ * O braço dos CASOS grava o aviso no idioma da organização, no instante do
+ * insert. Linhas já gravadas não são reescritas.
  */
 function esperaEmPalavras(horas: number, t: (texto: string) => string): string {
   const dias = Math.floor(horas / 24);
@@ -130,6 +122,7 @@ async function handle(req: NextRequest): Promise<Response> {
   }
 
   const casos = data ?? [];
+  const idiomas = new Map<string, Idioma>();
   let avisados = 0;
   let jaAvisados = 0;
 
@@ -154,19 +147,25 @@ async function handle(req: NextRequest): Promise<Response> {
       continue;
     }
 
+    const idiomaDoCaso = await idiomaDaOrganizacao(admin, caso.organization_id as string, idiomas);
+    const falar = (texto: string) => traduzir(texto, idiomaDoCaso);
     const { error: erroAviso } = await admin.from("agent_inbox_items").insert({
       organization_id: caso.organization_id,
       kind: "case_stale",
       // `warn` e não `critical`: há um cliente esperando, mas nada quebrou. O
       // vermelho é para o que está fora do ar — usá-lo aqui o desvaloriza.
       severity: "warn",
-      title: `Um atendimento espera decisão ${comoFaz(horas)}`,
+      title: copiar(idiomaDoCaso, "Um atendimento espera decisão {quando}", {
+        quando: esperaEmPalavras(horas, falar),
+      }),
       body:
-        `"${caso.title as string}" está aguardando alguém da equipe desde que foi aberto, ` +
-        `e o cliente continua do outro lado. Abra o caso e diga o que fazer — concluir, ` +
-        `pedir informação ao cliente ou passar para uma pessoa.` +
+        copiar(
+          idiomaDoCaso,
+          '"{titulo}" está aguardando alguém da equipe desde que foi aberto, e o cliente continua do outro lado. Abra o caso e diga o que fazer — concluir, pedir informação ao cliente ou passar para uma pessoa.',
+          { titulo: String(caso.title ?? "") },
+        ) +
         (tentativa >= TETO_DE_COBRANCAS
-          ? " Este é o último aviso automático sobre ele."
+          ? ` ${falar("Este é o último aviso automático sobre ele.")}`
           : ""),
       ref_kind: "agent_case",
       ref_id: caso.id,

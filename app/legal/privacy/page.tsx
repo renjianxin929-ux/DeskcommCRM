@@ -8,7 +8,14 @@ import { traduzir } from "@/lib/i18n/dicionario";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "Política de Privacidade" };
+export async function generateMetadata(): Promise<Metadata> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const idioma = await idiomaDoVisitante((user?.user_metadata?.locale as string | undefined) ?? null);
+  return { title: traduzir("Política de Privacidade", idioma) };
+}
 
 export default async function PrivacyPage() {
   const op = await resolverOperador();

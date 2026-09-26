@@ -1,4 +1,7 @@
 import { NEUTROS_DE_SAIDA, type MarcaDeSaida } from "@/lib/branding/saida";
+import { copiar } from "@/lib/i18n/copiar";
+import { tagDeIdioma } from "@/lib/i18n/datas";
+import type { Idioma } from "@/lib/i18n/idiomas";
 
 /**
  * Os dois e-mails de ACESSO — confirmar conta e redefinir senha — no formato
@@ -39,28 +42,38 @@ export type ModeloDeAcesso = "confirmation" | "recovery";
 export const MODELOS_DE_ACESSO: readonly ModeloDeAcesso[] = ["confirmation", "recovery"];
 
 /** O texto de cada modelo. Assunto entra no `GOTRUE_MAILER_SUBJECTS_*`. */
-const COPIA: Record<ModeloDeAcesso, { assunto: (marca: string) => string; titulo: string; corpo: (marca: string) => string; botao: string; rodape: string }> = {
-  confirmation: {
-    assunto: (marca) => `Confirme seu e-mail · ${marca}`,
-    titulo: "Confirme seu e-mail",
-    corpo: (marca) =>
-      `Sua conta no ${marca} está quase pronta. Clique no botão abaixo para confirmar seu e-mail e ativar sua conta.`,
-    botao: "Confirmar e-mail",
-    rodape: "Se você não criou esta conta, ignore este e-mail.",
-  },
-  recovery: {
-    assunto: (marca) => `Redefinir sua senha · ${marca}`,
-    titulo: "Redefinir sua senha",
-    corpo: (marca) =>
-      `Recebemos um pedido para redefinir a senha da sua conta no ${marca}. Clique no botão abaixo para escolher uma nova.`,
-    botao: "Definir nova senha",
-    rodape:
-      "Se não foi você quem pediu, ignore este e-mail — sua senha continua a mesma.",
-  },
-};
+function copia(modelo: ModeloDeAcesso, idioma: Idioma, marca: string) {
+  const t = (chave: string, vars: Record<string, string> = {}) => copiar(idioma, chave, vars);
+  if (modelo === "confirmation") {
+    return {
+      assunto: t("Confirme seu e-mail · {marca}", { marca }),
+      titulo: t("Confirme seu e-mail"),
+      corpo: t(
+        "Sua conta no {marca} está quase pronta. Clique no botão abaixo para confirmar seu e-mail e ativar sua conta.",
+        { marca },
+      ),
+      botao: t("Confirmar e-mail"),
+      rodape: t("Se você não criou esta conta, ignore este e-mail."),
+    };
+  }
+  return {
+    assunto: t("Redefinir sua senha · {marca}", { marca }),
+    titulo: t("Redefinir sua senha"),
+    corpo: t(
+      "Recebemos um pedido para redefinir a senha da sua conta no {marca}. Clique no botão abaixo para escolher uma nova.",
+      { marca },
+    ),
+    botao: t("Definir nova senha"),
+    rodape: t("Se não foi você quem pediu, ignore este e-mail — sua senha continua a mesma."),
+  };
+}
 
-export function assuntoDoModelo(modelo: ModeloDeAcesso, marca: MarcaDeSaida): string {
-  return COPIA[modelo].assunto(marca.nome);
+export function assuntoDoModelo(
+  modelo: ModeloDeAcesso,
+  marca: MarcaDeSaida,
+  idioma: Idioma = "pt-BR",
+): string {
+  return copia(modelo, idioma, marca.nome).assunto;
 }
 
 /**
@@ -70,8 +83,12 @@ export function assuntoDoModelo(modelo: ModeloDeAcesso, marca: MarcaDeSaida): st
  * de `invite.ts` — inclusive a dimensão no atributo, que o Outlook desktop
  * exige porque descarta `height` de style em imagem.
  */
-export function montarTemplateDeAcesso(modelo: ModeloDeAcesso, marca: MarcaDeSaida): string {
-  const t = COPIA[modelo];
+export function montarTemplateDeAcesso(
+  modelo: ModeloDeAcesso,
+  marca: MarcaDeSaida,
+  idioma: Idioma = "pt-BR",
+): string {
+  const t = copia(modelo, idioma, marca.nome);
   const nome = escapeHtml(marca.nome);
 
   const logo = marca.logoUrl
@@ -82,7 +99,7 @@ export function montarTemplateDeAcesso(modelo: ModeloDeAcesso, marca: MarcaDeSai
   const destino = "{{ .RedirectTo }}&token_hash={{ .TokenHash }}";
 
   return `<!doctype html>
-<html lang="pt-BR">
+<html lang="${tagDeIdioma(idioma)}">
 <body style="margin:0;padding:0;background:${NEUTROS_DE_SAIDA.fundo};font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:${NEUTROS_DE_SAIDA.texto}">
   <div style="max-width:560px;margin:0 auto;padding:32px 24px">
     ${logo}
@@ -90,7 +107,7 @@ export function montarTemplateDeAcesso(modelo: ModeloDeAcesso, marca: MarcaDeSai
       ${escapeHtml(t.titulo)}
     </h1>
     <p style="margin:0 0 16px;font-size:15px;line-height:1.5">
-      ${escapeHtml(t.corpo(marca.nome))}
+      ${escapeHtml(t.corpo)}
     </p>
     <p style="margin:24px 0">
       <a href="${destino}" style="display:inline-block;padding:12px 24px;background:${marca.accent};color:${marca.accentFg};border-radius:6px;text-decoration:none;font-weight:600">
@@ -98,7 +115,7 @@ export function montarTemplateDeAcesso(modelo: ModeloDeAcesso, marca: MarcaDeSai
       </a>
     </p>
     <p style="margin:0 0 8px;font-size:13px;color:${NEUTROS_DE_SAIDA.suave}">
-      Ou copie e cole este link no navegador:<br>
+      ${escapeHtml(copiar(idioma, "Ou copie e cole este link no navegador:"))}<br>
       <span style="word-break:break-all;color:${marca.accent}">${destino}</span>
     </p>
     <p style="margin:24px 0 0;font-size:13px;color:${NEUTROS_DE_SAIDA.suave}">

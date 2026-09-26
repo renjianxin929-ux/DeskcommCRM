@@ -242,7 +242,7 @@ describe("opt-out", () => {
     // Sem esta ligação, cada metade passava sozinha e a pessoa pedia para sair
     // sem sair — que é pior que nunca ter prometido, porque ela responde, nada
     // acontece, e conclui que foi ignorada.
-    for (const locale of ["pt-BR", "es-AR", "en-US"]) {
+    for (const locale of ["pt-BR", "es-AR", "en-US", "zh-CN"]) {
       ultimoUpdate = null;
       await rodar({ texto: palavraDeSaida(locale) });
       expect(

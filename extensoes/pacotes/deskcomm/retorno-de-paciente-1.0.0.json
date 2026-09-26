@@ -20,11 +20,13 @@
   "display": {
     "title": {
       "pt-BR": "Retorno de paciente",
-      "es": "Retorno del paciente"
+      "es": "Retorno del paciente",
+      "zh-CN": "患者复诊"
     },
     "summary": {
       "pt-BR": "Duas rotinas curtas para a recepção não perder quem tratou e não remarcou: quem falar hoje e quais encaixes a semana ainda tem.",
-      "es": "Dos rutinas cortas para que la recepción no pierda a quien se trató y no volvió a agendar."
+      "es": "Dos rutinas cortas para que la recepción no pierda a quien se trató y no volvió a agendar.",
+      "zh-CN": "前台用的两段短流程，避免弄丢已经看过诊却没有再预约的人：今天该联系谁，以及这周还剩哪些空档。"
     },
     "category": "service",
     "icon": "ListChecks"
@@ -39,38 +41,45 @@
         "id": "quem-nao-remarcou",
         "title": {
           "pt-BR": "Quem tratou e não remarcou",
-          "es": "Quién se trató y no volvió a agendar"
+          "es": "Quién se trató y no volvió a agendar",
+          "zh-CN": "看过诊但没有再预约的人"
         },
         "description": {
           "pt-BR": "A conversa de quem esteve na clínica nas últimas semanas e saiu sem próxima data. Chame antes que vire mais um mês parado.",
-          "es": "La conversación de quien estuvo en la clínica y salió sin próxima fecha."
+          "es": "La conversación de quien estuvo en la clínica y salió sin próxima fecha.",
+          "zh-CN": "最近几周来过诊所、离开时没有下一次日期的会话。在它变成又一个停着的月份之前联系。"
         },
         "icon": "BookOpen",
         "blocks": [
           {
             "heading": {
               "pt-BR": "Comece pelo procedimento que pede retorno",
-              "es": "Empiece por el procedimiento que pide retorno"
+              "es": "Empiece por el procedimiento que pide retorno",
+              "zh-CN": "先从需要复诊的项目开始"
             },
             "body": {
               "pt-BR": "Limpeza, clareamento e ajuste de aparelho têm retorno previsto. Abra as conversas dessas pessoas primeiro: elas já decidiram tratar, e a ligação é lembrete, não venda.",
-              "es": "Limpieza, blanqueamiento y ajuste de ortodoncia tienen retorno previsto. Abra primero esas conversaciones."
+              "es": "Limpieza, blanqueamiento y ajuste de ortodoncia tienen retorno previsto. Abra primero esas conversaciones.",
+              "zh-CN": "洁牙、美白和矫治器调整都有预计的复诊。先打开这些人的会话：他们已经决定治疗，这次联系是提醒，不是推销。"
             }
           },
           {
             "heading": {
               "pt-BR": "Uma mensagem, uma pergunta",
-              "es": "Un mensaje, una pregunta"
+              "es": "Un mensaje, una pregunta",
+              "zh-CN": "一条消息，一个问题"
             },
             "body": {
-              "pt-BR": "Diga o procedimento, diga o prazo e ofereça dois horários concretos. Mensagem que termina em pergunta aberta volta como silêncio."
+              "pt-BR": "Diga o procedimento, diga o prazo e ofereça dois horários concretos. Mensagem que termina em pergunta aberta volta como silêncio.",
+              "zh-CN": "说出项目、说出时间，并给出两个具体时段。以开放式问题结尾的消息，回来的往往是沉默。"
             }
           }
         ],
         "action": {
           "label": {
             "pt-BR": "Abrir conversas",
-            "es": "Abrir conversaciones"
+            "es": "Abrir conversaciones",
+            "zh-CN": "打开会话"
           },
           "capability": "inbox.open"
         }
@@ -79,26 +88,31 @@
         "id": "encaixes-da-semana",
         "title": {
           "pt-BR": "Encaixes que a semana ainda tem",
-          "es": "Huecos que la semana todavía tiene"
+          "es": "Huecos que la semana todavía tiene",
+          "zh-CN": "这周还剩的空档"
         },
         "description": {
-          "pt-BR": "Antes de oferecer horário por telefone, olhe onde a agenda está vazia. Oferecer o que não existe custa a confiança de quem atendeu."
+          "pt-BR": "Antes de oferecer horário por telefone, olhe onde a agenda está vazia. Oferecer o que não existe custa a confiança de quem atendeu.",
+          "zh-CN": "在电话里给时间之前，先看日程哪里是空的。提供并不存在的时段，会消耗接待过的人的信任。"
         },
         "icon": "Lightbulb",
         "blocks": [
           {
             "heading": {
-              "pt-BR": "Ofereça dois horários, nunca a agenda inteira"
+              "pt-BR": "Ofereça dois horários, nunca a agenda inteira",
+              "zh-CN": "给出两个时段，不要把整周日程都甩出去"
             },
             "body": {
-              "pt-BR": "Quem escolhe entre duas opções responde; quem recebe a semana toda adia. Escolha um horário cedo e um no fim do dia, e deixe o resto para quem insistir."
+              "pt-BR": "Quem escolhe entre duas opções responde; quem recebe a semana toda adia. Escolha um horário cedo e um no fim do dia, e deixe o resto para quem insistir.",
+              "zh-CN": "在两个选项里做选择的人会回复；收到整整一周的人会拖延。选一个早些的时段和一个一天结束前的时段，其余留给还会再问的人。"
             }
           }
         ],
         "action": {
           "label": {
             "pt-BR": "Abrir agenda",
-            "es": "Abrir agenda"
+            "es": "Abrir agenda",
+            "zh-CN": "打开日程"
           },
           "capability": "agenda.open"
         }

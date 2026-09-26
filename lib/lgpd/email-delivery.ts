@@ -29,6 +29,9 @@ import { createHash } from "node:crypto";
 
 import { NEUTROS_DE_SAIDA, type MarcaDeSaida } from "@/lib/branding/saida";
 import { sendEmail } from "@/lib/email/roteador";
+import { copiar } from "@/lib/i18n/copiar";
+import { tagDeIdioma } from "@/lib/i18n/datas";
+import type { Idioma } from "@/lib/i18n/idiomas";
 
 export class EmailNotConfigured extends Error {
   constructor() {
@@ -55,43 +58,46 @@ interface SendArgs {
   expiresAt: Date;
   /** A marca de quem PROCESSOU a solicitação. Obrigatória — ver o cabeçalho. */
   marca: MarcaDeSaida;
+  /** Idioma da organização. Omitido, o molde continua em português. */
+  idioma?: Idioma;
 }
 
 export async function sendExportEmail(args: SendArgs): Promise<{ messageId: string }> {
+  const idioma = args.idioma ?? "pt-BR";
+  const t = (chave: string, vars: Record<string, string> = {}) => copiar(idioma, chave, vars);
   const shortId = args.requestId.slice(0, 8);
-  const orgName = escapeHtml(args.marca.nome);
-  const expiresFmt = args.expiresAt.toLocaleString("pt-BR", {
+  const expiresFmt = args.expiresAt.toLocaleString(tagDeIdioma(idioma), {
     timeZone: "America/Sao_Paulo",
   });
 
-  const subject = `Sua solicitação LGPD #${shortId}`;
+  const subject = t("Sua solicitação LGPD #{id}", { id: shortId });
 
   const html = `<!doctype html>
-<html lang="pt-BR">
+<html lang="${tagDeIdioma(idioma)}">
 <body style="font-family:-apple-system,Helvetica,Arial,sans-serif;color:${NEUTROS_DE_SAIDA.texto};line-height:1.5;max-width:560px;margin:0 auto;padding:24px;">
-  <h2 style="margin:0 0 12px;font-size:18px;">Solicitação LGPD #${shortId} processada</h2>
-  <p>Olá,</p>
-  <p>Sua solicitação de acesso aos dados pessoais (LGPD Art. 18, II) foi processada por <strong>${orgName}</strong>.</p>
-  <p>O relatório completo está disponível para download no link abaixo. Por motivos de segurança, o link expira em <strong>${expiresFmt}</strong>.</p>
+  <h2 style="margin:0 0 12px;font-size:18px;">${escapeHtml(t("Solicitação LGPD #{id} processada", { id: shortId }))}</h2>
+  <p>${escapeHtml(t("Olá,"))}</p>
+  <p>${escapeHtml(t("Sua solicitação de acesso aos dados pessoais (LGPD Art. 18, II) foi processada por {org}.", { org: args.marca.nome }))}</p>
+  <p>${escapeHtml(t("O relatório completo está disponível para download no link abaixo. Por motivos de segurança, o link expira em {quando}.", { quando: expiresFmt }))}</p>
   <p style="margin:24px 0;">
-    <a href="${args.signedUrl}" style="background:${args.marca.accent};color:${args.marca.accentFg};padding:10px 18px;border-radius:6px;text-decoration:none;display:inline-block;">Baixar relatório LGPD</a>
+    <a href="${args.signedUrl}" style="background:${args.marca.accent};color:${args.marca.accentFg};padding:10px 18px;border-radius:6px;text-decoration:none;display:inline-block;">${escapeHtml(t("Baixar relatório LGPD"))}</a>
   </p>
-  <p style="font-size:12px;color:${NEUTROS_DE_SAIDA.suave};">Se você não solicitou este relatório, ignore este email — nenhum dado adicional é compartilhado.</p>
-  <p style="font-size:12px;color:${NEUTROS_DE_SAIDA.suave};">Base legal: LGPD Lei nº 13.709/2018, Art. 18, II.</p>
+  <p style="font-size:12px;color:${NEUTROS_DE_SAIDA.suave};">${escapeHtml(t("Se você não solicitou este relatório, ignore este email — nenhum dado adicional é compartilhado."))}</p>
+  <p style="font-size:12px;color:${NEUTROS_DE_SAIDA.suave};">${escapeHtml(t("Base legal: LGPD Lei nº 13.709/2018, Art. 18, II."))}</p>
 </body>
 </html>`;
 
   // O corpo em texto puro NÃO passa por `escapeHtml` — escapar aqui mostraria
   // `&amp;` ao titular numa marca como "Silva &amp; Filhos".
-  const text = `Solicitação LGPD #${shortId} processada por ${args.marca.nome}.
+  const text = `${t("Solicitação LGPD #{id} processada por {org}.", { id: shortId, org: args.marca.nome })}
 
-O relatório completo está disponível em:
+${t("O relatório completo está disponível em:")}
 ${args.signedUrl}
 
-O link expira em ${expiresFmt}.
+${t("O link expira em {quando}.", { quando: expiresFmt })}
 
-Se você não solicitou este relatório, ignore este email.
-Base legal: LGPD Lei nº 13.709/2018, Art. 18, II.`;
+${t("Se você não solicitou este relatório, ignore este email.")}
+${t("Base legal: LGPD Lei nº 13.709/2018, Art. 18, II.")}`;
 
   const result = await sendEmail({
     to: args.to,

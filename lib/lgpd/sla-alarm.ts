@@ -15,6 +15,9 @@ import * as Sentry from "@sentry/nextjs";
 import { NEUTROS_DE_SAIDA, type MarcaDeSaida } from "@/lib/branding/saida";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email/roteador";
+import { copiar } from "@/lib/i18n/copiar";
+import { tagDeIdioma } from "@/lib/i18n/datas";
+import { idiomaDaOrganizacao } from "@/lib/i18n/idioma-da-org";
 import { audit } from "@/lib/audit";
 import { env } from "@/lib/env";
 import { valorDaInstalacao } from "@/lib/instalacao/config";
@@ -114,18 +117,20 @@ export async function triggerSlaAlarm(
   } else {
     try {
       const shortId = request.id.slice(0, 8);
-      const orgName = escapeHtml(organizationName || marca.nome);
+      const nomeLegivel = organizationName || marca.nome;
       const appUrl = env.NEXT_PUBLIC_APP_URL;
       const requestUrl = `${appUrl}/app/lgpd/requests/${request.id}`;
+      const idioma = await idiomaDaOrganizacao(createAdminClient(), request.organization_id);
+      const t = (chave: string, vars: Record<string, string | number> = {}) =>
+        copiar(idioma, chave, vars);
 
-      const subject = `[LGPD] Solicitação ${shortId} próxima do vencimento`;
+      const subject = t("[LGPD] Solicitação {id} próxima do vencimento", { id: shortId });
 
-      const thresholdLabel =
-        threshold === "data_request_d5"
-          ? "D+5 (acesso a dados)"
-          : "D+10 (anonimização/exclusão)";
+      const thresholdLabel = t(
+        threshold === "data_request_d5" ? "D+5 (acesso a dados)" : "D+10 (anonimização/exclusão)",
+      );
 
-      const dueFmt = new Date(request.due_at).toLocaleString("pt-BR", {
+      const dueFmt = new Date(request.due_at).toLocaleString(tagDeIdioma(idioma), {
         timeZone: "America/Sao_Paulo",
         day: "2-digit",
         month: "2-digit",
@@ -137,35 +142,35 @@ export async function triggerSlaAlarm(
       // verde deixa de comunicar urgência — a cor aqui é a informação.
       const overdueNote =
         daysOverdue > 0
-          ? `<p style="color:#dc2626;font-weight:600;">⚠ Esta solicitação está ${daysOverdue} dia(s) em atraso.</p>`
-          : `<p>O prazo vence em <strong>${dueFmt}</strong>.</p>`;
+          ? `<p style="color:#dc2626;font-weight:600;">⚠ ${escapeHtml(t("Esta solicitação está {dias} dia(s) em atraso.", { dias: daysOverdue }))}</p>`
+          : `<p>${escapeHtml(t("O prazo vence em {quando}.", { quando: dueFmt }))}</p>`;
 
       const html = `<!doctype html>
-<html lang="pt-BR">
+<html lang="${tagDeIdioma(idioma)}">
 <body style="font-family:-apple-system,Helvetica,Arial,sans-serif;color:${NEUTROS_DE_SAIDA.texto};line-height:1.5;max-width:560px;margin:0 auto;padding:24px;">
-  <h2 style="margin:0 0 12px;font-size:18px;">[LGPD] Alerta de SLA — Solicitação #${shortId}</h2>
-  <p>Olá,</p>
-  <p>A solicitação LGPD <strong>#${shortId}</strong> de <strong>${orgName}</strong> atingiu o limiar <strong>${thresholdLabel}</strong>.</p>
+  <h2 style="margin:0 0 12px;font-size:18px;">${escapeHtml(t("[LGPD] Alerta de SLA — Solicitação #{id}", { id: shortId }))}</h2>
+  <p>${escapeHtml(t("Olá,"))}</p>
+  <p>${escapeHtml(t("A solicitação LGPD #{id} de {org} atingiu o limiar {limiar}.", { id: shortId, org: nomeLegivel, limiar: thresholdLabel }))}</p>
   ${overdueNote}
-  <p>Status atual: <code>${request.request_type}</code> / <code>${request.status}</code></p>
+  <p>${escapeHtml(t("Status atual:"))} <code>${request.request_type}</code> / <code>${request.status}</code></p>
   <p style="margin:24px 0;">
-    <a href="${requestUrl}" style="background:${marca.accent};color:${marca.accentFg};padding:10px 18px;border-radius:6px;text-decoration:none;display:inline-block;">Ver solicitação no painel</a>
+    <a href="${requestUrl}" style="background:${marca.accent};color:${marca.accentFg};padding:10px 18px;border-radius:6px;text-decoration:none;display:inline-block;">${escapeHtml(t("Ver solicitação no painel"))}</a>
   </p>
-  <p style="font-size:12px;color:${NEUTROS_DE_SAIDA.suave};">Base legal: LGPD Lei nº 13.709/2018, Art. 18. SLA obrigatório conforme regulamentação vigente.</p>
+  <p style="font-size:12px;color:${NEUTROS_DE_SAIDA.suave};">${escapeHtml(t("Base legal: LGPD Lei nº 13.709/2018, Art. 18. SLA obrigatório conforme regulamentação vigente."))}</p>
 </body>
 </html>`;
 
       // Texto puro não escapa: `&amp;` no corpo de um alarme é ruído.
-      const text = `[LGPD] Alerta de SLA — Solicitação #${shortId}
+      const text = `${t("[LGPD] Alerta de SLA — Solicitação #{id}", { id: shortId })}
 
-A solicitação LGPD #${shortId} de ${organizationName || marca.nome} atingiu o limiar ${thresholdLabel}.
-${daysOverdue > 0 ? `Esta solicitação está ${daysOverdue} dia(s) em atraso.` : `Prazo: ${dueFmt}.`}
+${t("A solicitação LGPD #{id} de {org} atingiu o limiar {limiar}.", { id: shortId, org: nomeLegivel, limiar: thresholdLabel })}
+${daysOverdue > 0 ? t("Esta solicitação está {dias} dia(s) em atraso.", { dias: daysOverdue }) : t("Prazo: {quando}.", { quando: dueFmt })}
 
-Status: ${request.request_type} / ${request.status}
+${t("Status atual:")} ${request.request_type} / ${request.status}
 
-Acesse: ${requestUrl}
+${requestUrl}
 
-Base legal: LGPD Lei nº 13.709/2018, Art. 18.`;
+${t("Base legal: LGPD Lei nº 13.709/2018, Art. 18. SLA obrigatório conforme regulamentação vigente.")}`;
 
       const result = await sendEmail({
         to: recipientEmail,

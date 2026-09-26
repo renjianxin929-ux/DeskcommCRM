@@ -27,7 +27,7 @@ export const EXTENSION_LIMITS = {
   bodyCharacters: 2_000,
 } as const;
 
-export type LocalizedText = { "pt-BR": string; es?: string };
+export type LocalizedText = { "pt-BR": string; es?: string; "zh-CN"?: string };
 
 export type ExtensionConfiguration = {
   density: "comfortable" | "compact";
@@ -146,7 +146,7 @@ function textSchema(maxCharacters: number) {
 
 function localizedTextSchema(maxCharacters: number) {
   const text = textSchema(maxCharacters);
-  return z.object({ "pt-BR": text, es: text.optional() }).strict();
+  return z.object({ "pt-BR": text, es: text.optional(), "zh-CN": text.optional() }).strict();
 }
 
 const hostApiSchema = z
@@ -465,10 +465,14 @@ function incompatible(reason: CompatibilityReason): CompatibilityResult {
 }
 
 export function localize(text: LocalizedText, locale: string): { text: string; fallback: boolean } {
-  if (locale.toLowerCase().split("-")[0] === "es" && text.es !== undefined) {
+  const normalizado = locale.toLowerCase();
+  if ((normalizado === "zh-cn" || normalizado === "zh") && text["zh-CN"]) {
+    return { text: text["zh-CN"], fallback: false };
+  }
+  if (normalizado.split("-")[0] === "es" && text.es !== undefined) {
     return { text: text.es, fallback: false };
   }
-  return { text: text["pt-BR"], fallback: locale.toLowerCase() !== "pt-br" };
+  return { text: text["pt-BR"], fallback: normalizado !== "pt-br" };
 }
 
 async function sha256(bytes: Uint8Array) {
@@ -489,8 +493,10 @@ function mirrorsCatalog(manifest: ExtensionManifest, entry: CatalogEntry) {
     manifest.permissions.every((permission, index) => permission === entry.permissions[index]) &&
     manifest.display.title["pt-BR"] === entry.display.title["pt-BR"] &&
     manifest.display.title.es === entry.display.title.es &&
+    manifest.display.title["zh-CN"] === entry.display.title["zh-CN"] &&
     manifest.display.summary["pt-BR"] === entry.display.summary["pt-BR"] &&
     manifest.display.summary.es === entry.display.summary.es &&
+    manifest.display.summary["zh-CN"] === entry.display.summary["zh-CN"] &&
     manifest.display.category === entry.display.category &&
     manifest.display.icon === entry.display.icon
   );

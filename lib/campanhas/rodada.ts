@@ -49,6 +49,7 @@ import { renderizar } from "./renderizador";
 import { escolherNumero, poolDaCampanha, type NumeroDisponivel } from "./rodizio";
 import { podeMandarAgora, proximaTentativa, type RitmoDaCampanha } from "./ritmo";
 import { nomeDoContato } from "@/lib/contacts/rotulo-do-contato";
+import { idiomaDaOrganizacao } from "@/lib/i18n/idioma-da-org";
 import { TEXTO_DA_EXCLUSAO } from "./tipos";
 
 export interface ResultadoDaRodada {
@@ -400,10 +401,11 @@ async function rodarUmaCampanha(
   // preparação produziria "bom dia" numa mensagem enviada à tarde — foi o
   // defeito do primeiro piloto.
   const congelado = alvo.rendered_body ?? campanha.message_body ?? "";
+  const idioma = await idiomaDaOrganizacao(admin, campanha.organization_id);
   const corpo = renderizar(
     congelado,
     { nome: nomeDoContato(contato) },
-    { agora, fuso: knobs.timezone },
+    { agora, fuso: knobs.timezone, idioma },
   ).texto;
 
   try {

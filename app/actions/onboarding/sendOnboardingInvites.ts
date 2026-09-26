@@ -17,6 +17,9 @@ import { signInviteToken, INVITE_TTL_SECONDS } from "@/lib/auth/invite-token";
 import { buildInviteEmail } from "@/lib/email/templates/invite";
 import { sendEmail } from "@/lib/email/roteador";
 import { marcaDaSaida } from "@/lib/branding/saida";
+import { idiomaDaOrganizacao } from "@/lib/i18n/idioma-da-org";
+import type { Idioma } from "@/lib/i18n/idiomas";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { inviteOnboardingSchema } from "@/lib/schemas/onboarding";
 import { requireOnboardingCtx, patchOnboardingState, OnboardingError } from "./_shared";
 
@@ -75,6 +78,12 @@ export async function sendOnboardingInvites(payload: InvitePayload): Promise<Sen
   const inviterName = ctx.fullName ?? ctx.email ?? "Um colega";
   // Fora do laço: a marca é a mesma para o lote inteiro (mesma organização).
   const marca = await marcaDaSaida(ctx.orgId);
+  let idioma: Idioma = "pt-BR";
+  try {
+    idioma = await idiomaDaOrganizacao(createAdminClient(), ctx.orgId);
+  } catch {
+    idioma = "pt-BR";
+  }
 
   let sent = 0;
   let failed = 0;
@@ -99,6 +108,7 @@ export async function sendOnboardingInvites(payload: InvitePayload): Promise<Sen
       role: inv.role,
       expiresAt,
       marca,
+      idioma,
     });
     const result = await sendEmail({
       to: email,

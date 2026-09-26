@@ -3,6 +3,9 @@ import { normalizarModoDeOrcamento } from "@/lib/agent-engine/edge/llm/orcamento
 import { requirePlatformAdmin } from "@/lib/auth/requirePlatformAdmin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ok, fail } from "@/lib/api/wrappers";
+import { copiar } from "@/lib/i18n/copiar";
+import { tagDeIdioma } from "@/lib/i18n/datas";
+import { normalizarIdioma, type Idioma } from "@/lib/i18n/idiomas";
 
 export type AlertSeverity = "critical" | "warning" | "info";
 export type AlertKind =
@@ -35,12 +38,17 @@ export interface DashboardKPIs {
 // Requires platform admin gate (MFA-enforced).
 // Uses service-role client intentionally — cross-tenant read for super-admin.
 export async function GET(_req: NextRequest) {
+  let idioma: Idioma = "pt-BR";
   try {
-    await requirePlatformAdmin();
+    const gate = await requirePlatformAdmin();
+    idioma = normalizarIdioma((gate.user.user_metadata?.locale as string | undefined) ?? null);
   } catch {
     // requirePlatformAdmin redirects; if it throws, it's unexpected
     return fail("forbidden", "Platform admin required", 403);
   }
+  const t = (chave: string, vars: Record<string, string | number> = {}) => copiar(idioma, chave, vars);
+  const dataLegivel = (iso: string) =>
+    new Date(iso).toLocaleDateString(tagDeIdioma(idioma));
 
   const admin = createAdminClient();
 
@@ -175,8 +183,10 @@ export async function GET(_req: NextRequest) {
       tenant_name: (org as { display_name?: string })?.display_name ?? row.organization_id,
       message:
         row.status === "ban_suspected"
-          ? "Sessão WAHA com suspeita de banimento"
-          : `Sessão desconectada inesperadamente${row.status_reason ? `: ${row.status_reason}` : ""}`,
+          ? t("Sessão WAHA com suspeita de banimento")
+          : row.status_reason
+            ? `${t("Sessão desconectada inesperadamente")}: ${row.status_reason}`
+            : t("Sessão desconectada inesperadamente"),
       link: `/admin/tenants/${row.organization_id}/health`,
       created_at: row.updated_at,
     });
@@ -193,8 +203,8 @@ export async function GET(_req: NextRequest) {
       tenant_id: row.organization_id,
       tenant_name: (org as { display_name?: string })?.display_name ?? row.organization_id,
       message: isOverdue
-        ? `Requisição LGPD vencida em ${new Date(row.due_at).toLocaleDateString("pt-BR")}`
-        : `Prazo LGPD expira em ${new Date(row.due_at).toLocaleDateString("pt-BR")}`,
+        ? t("Requisição LGPD vencida em {data}", { data: dataLegivel(row.due_at) })
+        : t("Prazo LGPD expira em {data}", { data: dataLegivel(row.due_at) }),
       link: "/admin/lgpd",
       created_at: row.created_at,
     });
@@ -266,8 +276,10 @@ export async function GET(_req: NextRequest) {
       tenant_name: row.nome,
       message:
         row.modo === "bloquear"
-          ? `Budget IA ${Math.round(row.pct * 100)}% do teto (gasto acumulado) — este tenant escolheu parar a IA no limite`
-          : `Budget IA ${Math.round(row.pct * 100)}% do teto (gasto acumulado)`,
+          ? t("Budget IA {pct}% do teto (gasto acumulado) — este tenant escolheu parar a IA no limite", {
+              pct: Math.round(row.pct * 100),
+            })
+          : t("Budget IA {pct}% do teto (gasto acumulado)", { pct: Math.round(row.pct * 100) }),
       // Leva à saúde DO TENANT, e não a `/admin/usage`: é a única tela de admin
       // que lê a régua real (`fn_gasto_de_ia_do_mes`). Quem clicar por causa
       // deste alerta chega no número que decide, não em outro acumulado.
@@ -297,7 +309,7 @@ export async function GET(_req: NextRequest) {
         kind: "tenant_pending_overflow",
         tenant_id: orgId,
         tenant_name: name,
-        message: `${count} conversas pendentes sem atendimento`,
+        message: t("{count} conversas pendentes sem atendimento", { count }),
         link: `/admin/tenants/${orgId}/health`,
         created_at: new Date().toISOString(),
       });

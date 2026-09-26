@@ -184,15 +184,32 @@ Atribua sempre a fonte: "o cliente disse", "a IA registrou", "a equipe decidiu".
 Não invente. O que não estiver nos dados, diga que não está registrado.
 Seja curto.`;
 
+/**
+ * A regra de idioma vai POR ÚLTIMO.
+ *
+ * A persona pode ser o prompt do agente, e esse prompt antigo pede português.
+ * A última frase é a que o modelo obedece. pt-BR e a omissão não acrescentam
+ * nada: o bloco fixo já está em português, e o teste do prefixo compara a
+ * string inteira.
+ */
+const REGRA_DE_IDIOMA: Partial<Record<"zh-CN" | "es", string>> = {
+  "zh-CN":
+    "语言规则（优先于上面的人设和葡萄牙语说明）：请只用简体中文回答。正在阅读的人使用简体中文界面。不要用葡萄牙语回答。",
+  es: "Regla de idioma (tiene prioridad sobre la persona de arriba): responde solo en español. Quien lee está en español. No respondas en portugués.",
+};
+
 /** `system` completo: persona + memória da organização + o bloco fixo. */
 export function montarSystem(input: {
   persona: string;
   memoriaDaOrganizacao: string | null;
+  idioma?: "zh-CN" | "es" | "pt-BR";
 }): string {
   const partes = [input.persona.trim()];
   if (input.memoriaDaOrganizacao && input.memoriaDaOrganizacao.trim() !== "") {
     partes.push(input.memoriaDaOrganizacao.trim());
   }
   partes.push(INSTRUCAO_DA_CONSULTA_INTERNA);
+  const regra = input.idioma && input.idioma !== "pt-BR" ? REGRA_DE_IDIOMA[input.idioma] : undefined;
+  if (regra) partes.push(regra);
   return partes.join("\n\n");
 }

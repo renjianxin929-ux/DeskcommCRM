@@ -7,7 +7,14 @@ import { traduzir } from "@/lib/i18n/dicionario";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "Termos de Uso" };
+export async function generateMetadata(): Promise<Metadata> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const idioma = await idiomaDoVisitante((user?.user_metadata?.locale as string | undefined) ?? null);
+  return { title: traduzir("Termos de Uso", idioma) };
+}
 
 export default async function TermsPage() {
   const op = await resolverOperador();

@@ -2,6 +2,7 @@
 import * as React from "react";
 import { encode } from "gpt-tokenizer";
 import { useTagDeIdioma } from "@/hooks/i18n/useLocaleDeData";
+import { useT } from "@/hooks/i18n/useT";
 
 interface Props {
   text: string;
@@ -11,6 +12,7 @@ interface Props {
 
 export function TokenCounter({ text, contextWindow, className }: Props) {
   const tagDoIdioma = useTagDeIdioma();
+  const tr = useT();
   const [count, setCount] = React.useState<number | null>(null);
 
   React.useEffect(() => {
@@ -27,7 +29,7 @@ export function TokenCounter({ text, contextWindow, className }: Props) {
   if (count === null) {
     return (
       <span className={className} aria-live="polite">
-        — tokens
+        — {tr("tokens")}
       </span>
     );
   }
@@ -44,10 +46,10 @@ export function TokenCounter({ text, contextWindow, className }: Props) {
 
   return (
     <span className={`${tone} ${className ?? ""}`} aria-live="polite">
-      ~{count.toLocaleString(tagDoIdioma)} tokens
+      ~{count.toLocaleString(tagDoIdioma)} {tr("tokens")}
       {contextWindow ? ` / ${contextWindow.toLocaleString(tagDoIdioma)}` : ""}
-      {warn && !danger ? " · próximo do limite" : ""}
-      {danger ? " · acima do limite" : ""}
+      {warn && !danger ? ` · ${tr("próximo do limite")}` : ""}
+      {danger ? ` · ${tr("acima do limite")}` : ""}
     </span>
   );
 }

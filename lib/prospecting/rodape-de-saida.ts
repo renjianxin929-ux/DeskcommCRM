@@ -44,18 +44,22 @@ const PALAVRA_POR_IDIOMA: Record<string, string> = {
   // aprovadas pedem é BAJA, e ela está no conjunto por causa disso.
   es: "BAJA",
   en: "STOP",
+  // STOP já está no detector. Uma palavra chinesa nova teria de entrar no
+  // conjunto isolado; reutilizar STOP fecha o laço sem promessa falsa.
+  zh: "STOP",
 };
 
 const TEXTO_POR_IDIOMA: Record<string, (palavra: string) => string> = {
   pt: (p) => `Se não quiser mais receber mensagens, responda ${p}.`,
   es: (p) => `Si no querés recibir más mensajes, respondé ${p}.`,
   en: (p) => `If you'd rather not receive these messages, reply ${p}.`,
+  zh: (p) => `如果不想再收到这些消息，请单独回复 ${p}。`,
 };
 
 function raiz(locale: string | null | undefined): string {
   const r = (locale ?? "").toLowerCase().split(/[-_]/)[0] ?? "";
-  // Idioma desconhecido cai em português — o padrão do produto — em vez de
-  // ficar sem rodapé. Não oferecer saída é o defeito que este módulo conserta.
+  // Idioma sem rodapé próprio continua em português: `de-DE` e o vazio têm
+  // teste prendendo PARAR. zh-CN entra no mapa; não herda essa frase.
   return r in TEXTO_POR_IDIOMA ? r : "pt";
 }
 

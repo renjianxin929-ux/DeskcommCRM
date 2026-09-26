@@ -243,9 +243,11 @@ describe("manifesto declarativo", () => {
   });
 
   it("localiza e indica fallback para pt-BR", () => {
-    const text = { "pt-BR": "Olá", es: "Hola" };
+    const text = { "pt-BR": "Olá", es: "Hola", "zh-CN": "你好" };
     expect(localize(text, "es")).toEqual({ text: "Hola", fallback: false });
+    expect(localize(text, "zh-CN")).toEqual({ text: "你好", fallback: false });
     expect(localize(text, "en-US")).toEqual({ text: "Olá", fallback: true });
+    expect(localize({ "pt-BR": "Olá", es: "Hola" }, "zh-CN")).toEqual({ text: "Olá", fallback: true });
   });
 
   it("informa incompatibilidade por formato, perfil, API, permissão, dependência e capacidade", () => {

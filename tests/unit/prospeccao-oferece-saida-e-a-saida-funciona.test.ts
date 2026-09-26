@@ -48,6 +48,8 @@ describe("a abordagem fria oferece uma saída", () => {
   it("segue o idioma da instalação — e não inventa idioma que não existe", () => {
     expect(rodapeDeSaida("es-AR")).toContain("BAJA");
     expect(rodapeDeSaida("en-US")).toContain("STOP");
+    expect(rodapeDeSaida("zh-CN")).toContain("STOP");
+    expect(rodapeDeSaida("zh-CN")).not.toMatch(/receber mensagens/);
     // Idioma desconhecido cai no padrão do produto, COM rodapé. Ficar sem é o
     // defeito que este módulo conserta.
     expect(rodapeDeSaida("de-DE")).toContain("PARAR");
@@ -57,7 +59,7 @@ describe("a abordagem fria oferece uma saída", () => {
 
 describe("e a saída oferecida realmente funciona (a volta)", () => {
   it("responder a palavra do rodapé é reconhecido como pedido de saída", () => {
-    for (const locale of ["pt-BR", "es-AR", "en-US"]) {
+    for (const locale of ["pt-BR", "es-AR", "en-US", "zh-CN"]) {
       const palavra = palavraDeSaida(locale);
       expect(
         ehPedidoDeOptOut(palavra),

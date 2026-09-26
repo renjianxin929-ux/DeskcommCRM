@@ -47,6 +47,9 @@ import type { NextRequest } from "next/server";
 
 import { ok, fail } from "@/lib/api/wrappers";
 import { audit } from "@/lib/audit";
+import { copiar } from "@/lib/i18n/copiar";
+import { idiomaDaOrganizacao } from "@/lib/i18n/idioma-da-org";
+import type { Idioma } from "@/lib/i18n/idiomas";
 import { logger } from "@/lib/logger";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { autorizaCron } from "@/lib/auth/cron-auth";
@@ -82,13 +85,12 @@ interface PonteiroDesarmado {
   active_version_id: string | null;
 }
 
-export function corpoDoAviso(nome: string, kind: string): string {
-  const quando = COMO_DISPARA[kind] ?? "pelo gatilho configurado";
-  return (
-    `O fluxo «${nome}» está publicado e dispararia ${quando} — mas nenhum agente publicado ` +
-    `arma ele, e por isso nenhum contato entra. Abra IA › Agentes, escolha o agente que ` +
-    `atende esse número, marque «${nome}» em "follow-ups que arma" e publique a versão. ` +
-    `Este aviso se resolve sozinho quando o vínculo existir.`
+export function corpoDoAviso(nome: string, kind: string, idioma: Idioma = "pt-BR"): string {
+  const quando = copiar(idioma, COMO_DISPARA[kind] ?? "pelo gatilho configurado");
+  return copiar(
+    idioma,
+    'O fluxo «{nome}» está publicado e dispararia {quando} — mas nenhum agente publicado arma ele, e por isso nenhum contato entra. Abra IA › Agentes, escolha o agente que atende esse número, marque «{nome}» em "follow-ups que arma" e publique a versão. Este aviso se resolve sozinho quando o vínculo existir.',
+    { nome, quando },
   );
 }
 
@@ -179,6 +181,7 @@ async function handle(req: NextRequest): Promise<Response> {
   let abertos = 0;
   let jaAbertos = 0;
   let fechados = 0;
+  const idiomas = new Map<string, Promise<Idioma>>();
 
   for (const ponteiro of candidatos) {
     const armados = armadosPorOrg.get(ponteiro.organization_id);
@@ -222,6 +225,12 @@ async function handle(req: NextRequest): Promise<Response> {
       continue;
     }
 
+    let pendente = idiomas.get(ponteiro.organization_id);
+    if (!pendente) {
+      pendente = idiomaDaOrganizacao(admin, ponteiro.organization_id);
+      idiomas.set(ponteiro.organization_id, pendente);
+    }
+    const idioma = await pendente;
     const { error: erroAviso } = await admin.from("agent_inbox_items").insert({
       organization_id: ponteiro.organization_id,
       kind: KIND,
@@ -229,8 +238,8 @@ async function handle(req: NextRequest): Promise<Response> {
       // está. Mas também não é `info` — há gente que devia estar sendo
       // reengajada e não está, e isso pede uma ação de alguém.
       severity: "warn",
-      title: `O follow-up «${ponteiro.name}» não está disparando`,
-      body: corpoDoAviso(ponteiro.name, ponteiro.kind),
+      title: copiar(idioma, "O follow-up «{nome}» não está disparando", { nome: ponteiro.name }),
+      body: corpoDoAviso(ponteiro.name, ponteiro.kind, idioma),
       ref_kind: "followup_flow",
       ref_id: ponteiro.id,
     });

@@ -16,6 +16,18 @@
  * ter visto qualquer tela do produto.
  */
 import { NEUTROS_DE_SAIDA, type MarcaDeSaida } from "@/lib/branding/saida";
+import { copiar } from "@/lib/i18n/copiar";
+import { tagDeIdioma } from "@/lib/i18n/datas";
+import { traduzir } from "@/lib/i18n/dicionario";
+import type { Idioma } from "@/lib/i18n/idiomas";
+
+/** O papel no convite é o rótulo que a pessoa lê, não o valor de wire. */
+const ROTULO_DO_PAPEL: Record<string, string> = {
+  admin: "Administrador",
+  manager: "Gerente",
+  agent: "Atendente",
+  viewer: "Viewer",
+};
 
 export interface InviteEmailOptions {
   inviterName: string;
@@ -25,6 +37,11 @@ export interface InviteEmailOptions {
   expiresAt: Date;
   /** A marca de quem convidou. Obrigatória — sem ela o e-mail não tem dono. */
   marca: MarcaDeSaida;
+  /**
+   * Idioma da organização que convida. Quem recebe ainda não tem conta.
+   * Omitido, o molde continua em português — os testes do HTML comparam isso.
+   */
+  idioma?: Idioma;
 }
 
 export function buildInviteEmail(opts: InviteEmailOptions): {
@@ -32,11 +49,18 @@ export function buildInviteEmail(opts: InviteEmailOptions): {
   html: string;
   text: string;
 } {
-  const expiresStr = opts.expiresAt.toLocaleString("pt-BR", {
+  const idioma = opts.idioma ?? "pt-BR";
+  const t = (chave: string, vars: Record<string, string> = {}) => copiar(idioma, chave, vars);
+  const expiresStr = opts.expiresAt.toLocaleString(tagDeIdioma(idioma), {
     timeZone: "America/Sao_Paulo",
   });
   const marca = opts.marca.nome;
-  const subject = `${opts.inviterName} convidou você para a ${opts.orgName} no ${marca}`;
+  const papel = traduzir(ROTULO_DO_PAPEL[opts.role] ?? opts.role, idioma);
+  const subject = t("{quem} convidou você para a {org} no {marca}", {
+    quem: opts.inviterName,
+    org: opts.orgName,
+    marca,
+  });
 
   /**
    * O logo de quem convidou, quando há um.
@@ -60,39 +84,42 @@ export function buildInviteEmail(opts: InviteEmailOptions): {
     : "";
 
   const html = `<!doctype html>
-<html lang="pt-BR">
+<html lang="${tagDeIdioma(idioma)}">
 <body style="margin:0;padding:0;background:${NEUTROS_DE_SAIDA.fundo};font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:${NEUTROS_DE_SAIDA.texto}">
   <div style="max-width:560px;margin:0 auto;padding:32px 24px">
     ${logo}
     <h1 style="font-size:22px;line-height:1.3;margin:0 0 16px;color:${NEUTROS_DE_SAIDA.texto}">
-      Você foi convidado para a ${escapeHtml(opts.orgName)}
+      ${escapeHtml(t("Você foi convidado para a {org}", { org: opts.orgName }))}
     </h1>
     <p style="margin:0 0 16px;font-size:15px;line-height:1.5">
-      ${escapeHtml(opts.inviterName)} convidou você como
-      <strong>${escapeHtml(opts.role)}</strong> no ${escapeHtml(marca)}.
+      ${escapeHtml(t("{quem} convidou você como {papel} no {marca}.", { quem: opts.inviterName, papel, marca }))}
     </p>
     <p style="margin:24px 0">
       <a href="${opts.acceptUrl}" style="display:inline-block;padding:12px 24px;background:${opts.marca.accent};color:${opts.marca.accentFg};border-radius:6px;text-decoration:none;font-weight:600">
-        Aceitar convite
+        ${escapeHtml(t("Aceitar convite"))}
       </a>
     </p>
     <p style="margin:0 0 8px;font-size:13px;color:${NEUTROS_DE_SAIDA.suave}">
-      Ou copie e cole este link no navegador:<br>
+      ${escapeHtml(t("Ou copie e cole este link no navegador:"))}<br>
       <span style="word-break:break-all;color:${opts.marca.accent}">${opts.acceptUrl}</span>
     </p>
     <p style="margin:24px 0 0;font-size:13px;color:${NEUTROS_DE_SAIDA.suave}">
-      Este link expira em <strong>${expiresStr}</strong>. Se você não esperava este convite, pode ignorá-lo.
+      ${escapeHtml(t("Este link expira em {quando}. Se você não esperava este convite, pode ignorá-lo.", { quando: expiresStr }))}
     </p>
   </div>
 </body>
 </html>`;
 
   const text = [
-    `Você foi convidado para a ${opts.orgName} como ${opts.role} no ${marca}.`,
+    t("Você foi convidado para a {org} como {papel} no {marca}.", {
+      org: opts.orgName,
+      papel,
+      marca,
+    }),
     "",
-    `Aceitar: ${opts.acceptUrl}`,
+    t("Aceitar: {url}", { url: opts.acceptUrl }),
     "",
-    `Expira em ${expiresStr}.`,
+    t("Expira em {quando}.", { quando: expiresStr }),
   ].join("\n");
 
   return { subject, html, text };

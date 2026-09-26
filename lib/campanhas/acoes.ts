@@ -17,6 +17,7 @@ import { randomUUID } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { ApiErrorCode } from "@/lib/api/errors";
+import { idiomaDaOrganizacao } from "@/lib/i18n/idioma-da-org";
 import { sendMessageHandler } from "@/app/api/v1/messages/_handler";
 import { beginServiceAtOrigin } from "@/lib/atendimento/origem";
 
@@ -429,10 +430,11 @@ export async function testarAcao(
     };
   }
 
+  const idioma = await idiomaDaOrganizacao(admin, c.organization_id);
   const render = renderizar(
     c.message_body ?? "",
     { nome: nomeDoContato(linha) },
-    { agora, fuso },
+    { agora, fuso, idioma },
   );
   if (render.faltando.length > 0) {
     return {

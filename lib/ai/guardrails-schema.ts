@@ -207,7 +207,7 @@ export const agentCreateSchema = z
       .min(20)
       .max(10000)
       .default(
-        "Você é um assistente da loja. Responda com clareza e cordialidade, em português do Brasil. Use a base de conhecimento abaixo quando relevante.",
+        "Você é um assistente da loja. Responda com clareza e cordialidade, no idioma indicado por {{contact_locale}}. Quando esse idioma não estiver definido, use o idioma da organização. Use a base de conhecimento abaixo quando relevante.",
       ),
   })
   .strict();

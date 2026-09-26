@@ -22,6 +22,7 @@
  */
 
 import { createHash } from "node:crypto";
+import { idiomaDaOrganizacao } from "@/lib/i18n/idioma-da-org";
 import { valorDaInstalacao } from "@/lib/instalacao/config";
 
 import type { EventRow, HandlerResult } from "@/lib/event-log/dispatcher";
@@ -172,8 +173,9 @@ export async function processLgpdExport(event: EventRow): Promise<HandlerResult>
 
     // 4. Render PDF (with warning banner when unsigned).
     const padesConfigured = isPadesConfigured();
+    const idioma = await idiomaDaOrganizacao(admin, orgId);
     const { renderLgpdPdf } = await import("@/lib/lgpd/pdf-renderer");
-    const pdfBuffer = await renderLgpdPdf(data, { unsignedWarning: !padesConfigured });
+    const pdfBuffer = await renderLgpdPdf(data, { unsignedWarning: !padesConfigured, idioma });
 
     // 5. Sign (stubbed when key missing).
     const signResult = await signPdfPades(pdfBuffer);
@@ -275,6 +277,7 @@ export async function processLgpdExport(event: EventRow): Promise<HandlerResult>
         signedUrl: signed.signedUrl,
         expiresAt,
         marca: await marcaDaSaida(orgId),
+        idioma,
       });
       messageId = sent.messageId;
     } catch (err) {

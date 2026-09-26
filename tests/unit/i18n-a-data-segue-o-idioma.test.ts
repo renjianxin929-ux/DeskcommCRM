@@ -39,10 +39,8 @@ import { IDIOMAS } from "@/lib/i18n/idiomas";
  * produto servir um idioma que formate número diferente (inglês, por exemplo),
  * este parágrafo vira dívida e o guarda abaixo cresce para cobri-lo.
  *
- * **Data gerada no SERVIDOR para gravar.** `app/api/v1/admin/dashboard/kpis`
- * monta o texto de um aviso no momento em que ele nasce. Isso é conteúdo
- * gravado, não interface — mesma fronteira que o PR #352 declarou para o audit
- * log e para o título de `agent_inbox_items`.
+ * **Fuso legal.** Convite, PDF e alarme de LGPD formatam a data no idioma de
+ * quem lê e mantêm `America/Sao_Paulo` — o fuso da obrigação, não o da frase.
  */
 
 const RAIZ = join(__dirname, "..", "..");
@@ -62,33 +60,8 @@ const A_CAMADA_DE_DATA = new Set([
 /**
  * Exceções, cada uma com o motivo. SÓ ENCOLHE.
  */
-const FORA_DE_INTERFACE: Record<string, string> = {
-  "app/api/v1/admin/dashboard/kpis/route.ts":
-    "monta o texto do aviso no momento em que ele nasce — é conteúdo gravado, não interface",
-
-  // ─── E-mail: sai do produto e não tem provider de idioma ───
-  //
-  // A doutrina do repo já separa esta fronteira ("Saída sem DOM usa
-  // `marcaDaSaida()`"): e-mail é renderizado num worker, longe de qualquer
-  // contexto de React, e o idioma do destinatário não está resolvido ali — quem
-  // recebe um convite ainda NÃO TEM conta, então não tem preferência.
-  //
-  // Traduzir e-mail é um passe próprio: precisa decidir de onde vem o idioma
-  // (da organização que convida, presumivelmente), e mexe no teste de template
-  // que compara o HTML inteiro.
-  "lib/email/templates/invite.ts": "e-mail: renderizado fora do React; quem recebe convite ainda não tem conta",
-  "lib/lgpd/email-delivery.ts": "e-mail de LGPD: mesma fronteira do convite",
-  "lib/lgpd/sla-alarm.ts": "alarme por e-mail: mesma fronteira",
-
-  // ─── O PDF de LGPD é documento LEGAL, e fica em português por decisão ───
-  //
-  // Ele responde a um direito previsto na LGPD, lei brasileira, e nomeia o
-  // CONTROLADOR (`organizations.legal_name`) — o CLAUDE.md já trata este
-  // arquivo como caso especial pelo mesmo motivo. Emitir a data dele no idioma
-  // da interface faria um documento de conformidade mudar de forma conforme
-  // quem apertou o botão.
-  "lib/lgpd/pdf-renderer.tsx": "documento legal brasileiro: a data acompanha a lei, não a interface",
-};
+/** A lista só encolhe. E-mail, PDF e KPI passaram a receber o idioma de quem lê. */
+const FORA_DE_INTERFACE: Record<string, string> = {};
 
 function arquivos(dir: string, acc: string[] = []): string[] {
   for (const e of readdirSync(dir, { withFileTypes: true })) {

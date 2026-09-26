@@ -29,6 +29,15 @@ interface Capturado {
 function admin(casos: Array<Record<string, unknown>>, jaTemAviso: boolean, cap: Capturado) {
   return {
     from(tabela: string) {
+      if (tabela === "organizations") {
+        return {
+          select: () => ({
+            eq: () => ({
+              maybeSingle: async () => ({ data: { locale: "pt-BR" }, error: null }),
+            }),
+          }),
+        };
+      }
       if (tabela === "agent_cases") {
         return {
           select: () => {

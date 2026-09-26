@@ -27,6 +27,9 @@
  * fechado de resolvedores.
  */
 
+import { copiar } from "@/lib/i18n/copiar";
+import type { Idioma } from "@/lib/i18n/idiomas";
+
 import { horaNoFuso } from "./relogio";
 
 /** As variáveis que existem. Oferecer uma que não resolve é prometer dado que não há. */
@@ -59,7 +62,7 @@ export interface TextoRenderizado {
 export function renderizar(
   template: string,
   valores: ValoresDoDestinatario,
-  quando?: { agora: Date; fuso: string },
+  quando?: { agora: Date; fuso: string; idioma?: Idioma },
 ): TextoRenderizado {
   const nome = (valores.nome ?? "").trim();
   const faltando = new Set<VariavelDaCampanha>();
@@ -82,7 +85,7 @@ export function renderizar(
         // sabe a hora do envio, e cravar uma ali ensinaria o operador a esperar
         // aquela. A prévia mostra `{{saudacao}}`; o envio resolve.
         if (!quando) return literal;
-        return saudacaoDaHora(quando.agora, quando.fuso);
+        return saudacaoDaHora(quando.agora, quando.fuso, quando.idioma);
       }
       default:
         desconhecidas.add(bruto);
@@ -120,9 +123,8 @@ export function variaveisUsadas(template: string): VariavelDaCampanha[] {
  * Os cortes são os do português falado, não os do relógio: tarde começa ao
  * meio-dia e noite às 18h.
  */
-export function saudacaoDaHora(agora: Date, fuso: string): string {
+export function saudacaoDaHora(agora: Date, fuso: string, idioma: Idioma = "pt-BR"): string {
   const hora = horaNoFuso(agora, fuso);
-  if (hora < 12) return "Bom dia";
-  if (hora < 18) return "Boa tarde";
-  return "Boa noite";
+  const chave = hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite";
+  return copiar(idioma, chave);
 }
