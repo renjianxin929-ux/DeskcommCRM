@@ -12398,6 +12398,19 @@ export const DICIONARIO: Traducoes = {
   "falta uma chave da OpenAI para transcrever": { es: "falta una clave de OpenAI para transcribir" },
   "o endereço configurado para a transcrição não foi aceito como destino, então não enviei o áudio nem a chave para lá — confira TRANSCRIPTION_BASE_URL; se o serviço roda na rede interna, quem administra a instalação libera o endereço em Administração › Destinos internos": { es: "la dirección configurada para la transcripción no se aceptó como destino, así que no envié el audio ni la clave — revisa TRANSCRIPTION_BASE_URL; si el servicio corre en la red interna, quien administra la instalación libera la dirección en Administración › Destinos internos" },
   "Enquanto isso, o agente responde avisando que não conseguiu abrir o arquivo.": { es: "Mientras tanto, el agente responde avisando que no pudo abrir el archivo." },
+  "o operador desta instalação": { es: "el operador de esta instalación" },
+  "Cria o cadastro do cliente se ele ainda não existir, abre uma conversa nova no número de WhatsApp escolhido e manda a primeira mensagem para ele — de verdade, no celular dele.": {
+    es: "Crea el registro del cliente si todavía no existe, abre una conversación nueva en el número de WhatsApp elegido y envía el primer mensaje — de verdad, en su celular.",
+  },
+  "Guarda um texto vindo de outro sistema (ERP, formulário) na conversa, para a pessoa que atende revisar e enviar. Nada sai para o cliente por conta desta ação: o texto aparece no campo de resposta com o aviso de origem, e só o clique de quem atende manda a mensagem.": {
+    es: "Guarda un texto que viene de otro sistema (ERP, formulario) en la conversación, para que quien atiende lo revise y lo envíe. Nada sale al cliente por esta acción: el texto aparece en el campo de respuesta con el aviso de origen, y solo el clic de quien atiende envía el mensaje.",
+  },
+  "Coloca o cliente num acompanhamento já montado na tela, que decide quando falar, o que dizer e quando parar.": {
+    es: "Pone al cliente en un seguimiento ya armado en la pantalla, que decide cuándo hablar, qué decir y cuándo parar.",
+  },
+  "Confere o horário que o cliente pediu e, se estiver livre, já reserva na mesma conversa — em vez de só consultar e depender de uma segunda decisão para marcar.": {
+    es: "Comprueba el horario que pidió el cliente y, si está libre, ya lo reserva en la misma conversación — en vez de solo consultar y depender de una segunda decisión para agendar.",
+  },
 };
 
 // O catálogo chinês vive separado para continuar revisável como dados. Neste

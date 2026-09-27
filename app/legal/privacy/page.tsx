@@ -26,8 +26,6 @@ export default async function PrivacyPage() {
   // do banco nunca chega a um redirect.
   if (op.politicaPropria) redirect(op.politicaPropria);
 
-  const operador = nomeDoOperador(op);
-
   // Rota fora da árvore de `app/app/layout.tsx` — sem `IdiomaProvider`, então
   // resolve o idioma direto, como `admin/forbidden/page.tsx`. Página legal
   // pública: pode ser lida sem sessão, por isso `user` é opcional.
@@ -39,6 +37,7 @@ export default async function PrivacyPage() {
     (user?.user_metadata?.locale as string | undefined) ?? null,
   );
   const t = (texto: string) => traduzir(texto, idioma);
+  const operador = nomeDoOperador(op, idioma);
 
   return (
     <>

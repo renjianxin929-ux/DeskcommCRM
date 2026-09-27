@@ -18,7 +18,6 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function TermsPage() {
   const op = await resolverOperador();
-  const operador = nomeDoOperador(op);
 
   // Rota fora da árvore de `app/app/layout.tsx` — sem `IdiomaProvider`, então
   // resolve o idioma direto, como `admin/forbidden/page.tsx`. Página legal
@@ -31,6 +30,7 @@ export default async function TermsPage() {
     (user?.user_metadata?.locale as string | undefined) ?? null,
   );
   const t = (texto: string) => traduzir(texto, idioma);
+  const operador = nomeDoOperador(op, idioma);
 
   return (
     <>

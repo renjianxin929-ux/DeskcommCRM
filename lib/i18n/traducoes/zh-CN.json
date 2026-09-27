@@ -7910,5 +7910,10 @@
   "o provedor {provedor} não está disponível nesta instalação": "提供商 {provedor} 在本安装中不可用",
   "falta uma chave da OpenAI para transcrever": "缺少用于转写的 OpenAI 密钥",
   "o endereço configurado para a transcrição não foi aceito como destino, então não enviei o áudio nem a chave para lá — confira TRANSCRIPTION_BASE_URL; se o serviço roda na rede interna, quem administra a instalação libera o endereço em Administração › Destinos internos": "为转写配置的地址未被接受为目的地，因此没有把音频和密钥发过去——请核对 TRANSCRIPTION_BASE_URL；如果服务跑在内网，请由安装管理员在管理 › 内部目的地中放行该地址",
-  "Enquanto isso, o agente responde avisando que não conseguiu abrir o arquivo.": "与此同时，智能体会回复并说明自己打不开这个文件。"
+  "Enquanto isso, o agente responde avisando que não conseguiu abrir o arquivo.": "与此同时，智能体会回复并说明自己打不开这个文件。",
+  "o operador desta instalação": "本安装的运营方",
+  "Cria o cadastro do cliente se ele ainda não existir, abre uma conversa nova no número de WhatsApp escolhido e manda a primeira mensagem para ele — de verdade, no celular dele.": "如果客户还没有档案，就创建档案，在所选 WhatsApp 号码上打开新会话，并发送第一条消息——会真实发到对方手机上。",
+  "Guarda um texto vindo de outro sistema (ERP, formulário) na conversa, para a pessoa que atende revisar e enviar. Nada sai para o cliente por conta desta ação: o texto aparece no campo de resposta com o aviso de origem, e só o clique de quem atende manda a mensagem.": "把来自其他系统（ERP、表单）的文字放进会话，供接待人员核对后再发送。此操作本身不会发给客户：文字出现在回复框里并带来源提示，只有接待人员点击后才会发出。",
+  "Coloca o cliente num acompanhamento já montado na tela, que decide quando falar, o que dizer e quando parar.": "把客户放进页面上已经配好的跟进流程，由它决定何时开口、说什么、何时停止。",
+  "Confere o horário que o cliente pediu e, se estiver livre, já reserva na mesma conversa — em vez de só consultar e depender de uma segunda decisão para marcar.": "核对客户想要的时间，如果空闲就在同一会话里直接预约，而不只是查询后再等一次确认。"
 }

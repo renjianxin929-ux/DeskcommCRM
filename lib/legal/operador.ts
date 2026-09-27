@@ -12,6 +12,8 @@
  * O documento nomeia o OPERADOR — e, quando ele publicou a política dele, é a
  * dele que vale.
  */
+import { traduzir } from "@/lib/i18n/dicionario";
+import type { Idioma } from "@/lib/i18n/idiomas";
 import { env } from "@/lib/env";
 import { valorDaInstalacao } from "@/lib/instalacao/config";
 import { branding } from "@/lib/branding";
@@ -133,6 +135,6 @@ export async function resolverOperador(): Promise<Operador> {
 }
 
 /** Como o documento se refere ao operador quando não dá para saber quem é. */
-export function nomeDoOperador(op: Operador): string {
-  return op.razaoSocial ?? op.nome ?? "o operador desta instalação";
+export function nomeDoOperador(op: Operador, idioma: Idioma = "pt-BR"): string {
+  return op.razaoSocial ?? op.nome ?? traduzir("o operador desta instalação", idioma);
 }
