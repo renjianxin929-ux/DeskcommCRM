@@ -1,10 +1,9 @@
 name: CN RC1 verify
 
-# Não reconstrói e não faz push. Confere as imagens já publicadas em 0.1.0-rc1.
+# A prova das imagens 0.1.0-rc1 rodou em 47ee6856e. workflow_dispatch daqui
+# não dispara: o arquivo não está na main, e a main não se mexe.
 on:
-  push:
-    branches: [feat/zh-cn-complete]
-    paths: [".github/workflows/cn-rc1-verify.yml"]
+  workflow_dispatch:
 
 env:
   SOURCE_SHA: 0cc699b99e12885966923824eddc97b313ad9c12
