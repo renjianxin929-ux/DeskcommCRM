@@ -736,7 +736,7 @@ export function AgendaClient({
                           : "border-border text-text-muted hover:border-border-strong hover:text-text",
                       )}
                     >
-                      {opcao.nome}
+                      {t(opcao.nome)}
                       <span className="ml-1 tabular-nums opacity-70">{opcao.duracaoMin}min</span>
                     </button>
                   ))}

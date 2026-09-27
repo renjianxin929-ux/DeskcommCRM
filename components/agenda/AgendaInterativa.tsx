@@ -220,21 +220,21 @@ export function AgendaInterativa({
           className="flex flex-wrap items-center gap-1.5 text-xs text-text-muted"
         >
           <span className="shrink-0">{t("Horários livres de")}</span>
-          {tipos.map((t) => (
+          {tipos.map((tipoDaGrade) => (
             <button
-              key={t.id}
+              key={tipoDaGrade.id}
               type="button"
-              data-testid={`tipo-da-grade-${t.id}`}
-              aria-pressed={t.id === tipo?.id}
-              onClick={() => onEscolherTipo(t.id)}
+              data-testid={`tipo-da-grade-${tipoDaGrade.id}`}
+              aria-pressed={tipoDaGrade.id === tipo?.id}
+              onClick={() => onEscolherTipo(tipoDaGrade.id)}
               className={cn(
                 "rounded-full border px-2.5 py-0.5 transition-colors duration-fast",
-                t.id === tipo?.id
+                tipoDaGrade.id === tipo?.id
                   ? "border-transparent bg-accent text-accent-foreground"
                   : "border-border hover:border-border-strong hover:text-text",
               )}
             >
-              {t.nome}
+              {t(tipoDaGrade.nome)}
             </button>
           ))}
         </div>
