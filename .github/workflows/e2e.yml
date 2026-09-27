@@ -1109,11 +1109,22 @@ jobs:
       # MEDIDO na API real. O que só esta prova é que o contrato ainda é esse — a
       # versão fixada responde e a chave passa no teste. Sem a chave, ela pula; o
       # cabeçalho dela tem a receita para rodar contra a API de verdade.
+      #
+      # `zh-cn-release-acceptance` entrou aqui em 2026-09-27. É a aceitação
+      # visual do fork (15 caminhos, screenshots, navegador em zh-CN). Ela
+      # grava `locale` na conta e na organização que a suíte inteira compartilha
+      # e zera `onboarded_at` para fotografar o wizard — devolve os dois no
+      # afterAll, mas um vermelho no meio deixaria o resto do CI em chinês, a
+      # mesma classe que já derrubou 14 specs quando o espanhol ficou pela
+      # metade. O mecanismo de idioma no CI continua sendo
+      # `i18n-espanhol-na-tela` (PARTE_5). Esta roda na aceitação local:
+      # `pnpm exec playwright test tests/e2e/zh-cn-release-acceptance.spec.ts`.
       FORA_DO_CI: >-
         inbox-tempo-real.spec.ts
         cadastro-sem-confirmacao-de-email.spec.ts
         aviso-de-caso-chega-no-whatsapp.spec.ts
         jev-chave-real.spec.ts
+        zh-cn-release-acceptance.spec.ts
     steps:
       # ── O RELÓGIO DESTA PARTE: ONDE O TETO DE 30 MIN COMEÇA A CONTAR ──────
       #

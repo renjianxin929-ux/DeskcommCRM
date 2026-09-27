@@ -78,7 +78,10 @@ async function tentarMfa(page: Page, secret: string, tentativas: number): Promis
     const codigo = generateTotp(secret);
     ultimoCodigoEnviado = codigo;
 
-    const digito = page.locator('input[aria-label="Dígito 1"]');
+    // O fork resolve o visitante para zh-CN quando o navegador não pede pt-BR.
+    // O rótulo do dígito acompanha o idioma (`Dígito` / `数字`); os dois
+    // seletores cobrem a suíte antiga e a aceitação zh-CN sem mudar o produto.
+    const digito = page.locator('input[aria-label="Dígito 1"], input[aria-label="数字 1"]');
     await digito.waitFor({ state: "visible", timeout: 15_000 });
     // O campo desabilita enquanto o código anterior é verificado.
     for (let espera = 0; espera < 20 && (await digito.isDisabled()); espera++) {
@@ -141,7 +144,7 @@ export async function loginComoPapel(
     await page.goto("/login");
     await page.locator("#email").fill(usuario!.email);
     await page.locator("#password").fill(atuais.password);
-    await page.getByRole("button", { name: "Entrar", exact: true }).click();
+    await page.getByRole("button", { name: /^(Entrar|登录)$/ }).click();
     await page.waitForURL(/\/login\/mfa/, { timeout: 30_000 });
 
     if (await tentarMfa(page, fator!.secret, 3)) return atuais;
