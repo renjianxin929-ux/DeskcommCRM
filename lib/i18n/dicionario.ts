@@ -8967,6 +8967,7 @@ export const DICIONARIO: Traducoes = {
   "com": { es: "con" },
   "ocupado na agenda do Google": { es: "ocupado en la agenda de Google" },
   "Dia": { es: "Día" },
+  "Semana": { es: "Semana" },
   "Mês": { es: "Mes" },
   "Próximos": { es: "Próximas" },
   "Aguardando confirmação": { es: "Esperando confirmación" },
