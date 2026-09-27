@@ -1739,7 +1739,7 @@ CREATE TABLE IF NOT EXISTS "public"."organizations" (
     "cnpj" "text",
     "status" "text" DEFAULT 'active'::"text" NOT NULL,
     "timezone" "text" DEFAULT 'America/Sao_Paulo'::"text" NOT NULL,
-    "locale" "text" DEFAULT 'pt-BR'::"text" NOT NULL,
+    "locale" "text" DEFAULT 'zh-CN'::"text" NOT NULL,
     "rate_limit_rps" integer DEFAULT 100 NOT NULL,
     "ai_budget_cents" bigint,
     "media_retention_days" integer DEFAULT 365 NOT NULL,
@@ -18465,9 +18465,10 @@ begin
     end if;
     return prior.response_body || jsonb_build_object('created', false);
   end if;
-  insert into public.organizations(display_name, slug, legal_name, cnpj, status, settings, created_by)
+  insert into public.organizations(display_name, slug, legal_name, cnpj, status, settings, created_by, locale)
     values (p_request->>'display_name', p_request->>'slug', coalesce(nullif(p_request->>'legal_name', ''), p_request->>'display_name'),
-      p_request->>'cnpj', 'active', jsonb_build_object('plan', p_request->>'plan'), p_actor)
+      p_request->>'cnpj', 'active', jsonb_build_object('plan', p_request->>'plan'), p_actor,
+      case when p_request->>'locale' in ('zh-CN', 'pt-BR', 'es') then p_request->>'locale' else 'zh-CN' end)
     returning * into org;
   insert into public.user_organizations(organization_id, user_id, role, accepted_at)
     values (org.id, p_actor, 'admin', now());
@@ -18561,9 +18562,10 @@ begin
     end if;
     return prior.response_body || jsonb_build_object('created', false);
   end if;
-  insert into public.organizations(display_name, slug, legal_name, cnpj, status, settings, created_by)
+  insert into public.organizations(display_name, slug, legal_name, cnpj, status, settings, created_by, locale)
     values (p_request->>'display_name', p_request->>'slug', coalesce(nullif(p_request->>'legal_name', ''), p_request->>'display_name'),
-      p_request->>'cnpj', 'active', jsonb_build_object('plan', p_request->>'plan'), p_actor)
+      p_request->>'cnpj', 'active', jsonb_build_object('plan', p_request->>'plan'), p_actor,
+      case when p_request->>'locale' in ('zh-CN', 'pt-BR', 'es') then p_request->>'locale' else 'zh-CN' end)
     returning * into org;
   insert into public.user_organizations(organization_id, user_id, role, accepted_at)
     values (org.id, p_actor, 'admin', now());
@@ -19233,9 +19235,10 @@ begin
   dono_e_outra_pessoa := lower(p_request->>'owner_email') is distinct from
     (select lower(email) from auth.users where id = p_actor);
 
-  insert into public.organizations(display_name, slug, legal_name, cnpj, status, settings, created_by)
+  insert into public.organizations(display_name, slug, legal_name, cnpj, status, settings, created_by, locale)
     values (p_request->>'display_name', p_request->>'slug', coalesce(nullif(p_request->>'legal_name', ''), p_request->>'display_name'),
-      p_request->>'cnpj', 'active', jsonb_build_object('plan', p_request->>'plan'), p_actor)
+      p_request->>'cnpj', 'active', jsonb_build_object('plan', p_request->>'plan'), p_actor,
+      case when p_request->>'locale' in ('zh-CN', 'pt-BR', 'es') then p_request->>'locale' else 'zh-CN' end)
     returning * into org;
   insert into public.user_organizations(organization_id, user_id, role, accepted_at, interface_settings, provisional_until_handover)
     values (org.id, p_actor, 'admin', now(),

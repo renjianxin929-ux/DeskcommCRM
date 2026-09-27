@@ -60,8 +60,15 @@ import { ReprocessarConversao } from "./_reprocessar";
 import { FormularioDeCapturaDeUtm } from "./_formCapturaDeUtm";
 import { FormularioDeConversoes } from "./_form";
 import { FormularioDeConversoesGoogle } from "./_formGoogle";
+import { metadados } from "@/lib/i18n/metadados";
 
-export const metadata = { title: "Conversões" };
+
+export async function generateMetadata() {
+  return metadados({
+    title: "Conversões",
+  });
+}
+
 export const dynamic = "force-dynamic";
 
 /** O que a volta do OAuth do Google Ads diz, traduzido — ver o callback. */

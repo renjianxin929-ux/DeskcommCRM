@@ -5,8 +5,15 @@ import { estadoDosDestinosInternos } from "@/lib/automation/destinos-internos-au
 import { traduzir } from "@/lib/i18n/dicionario";
 
 import { FormularioDeDestinosInternos } from "./_form";
+import { metadados } from "@/lib/i18n/metadados";
 
-export const metadata = { title: "Destinos internos" };
+
+export async function generateMetadata() {
+  return metadados({
+    title: "Destinos internos",
+  });
+}
+
 export const dynamic = "force-dynamic";
 
 /**

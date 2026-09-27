@@ -29,6 +29,7 @@ import {
   verifyGraphPartnerSignature,
 } from "./graph-parceiro/webhook";
 import { sincronizarSaudeDaConexao } from "./health";
+import { idiomaDaOrganizacao } from "@/lib/i18n/idioma-da-org";
 import { lerEnvelopeMeta } from "./meta/envelope";
 import { ingestMetaEcho, ingestMetaInbound } from "./meta/ingest";
 import { parseMetaWebhook } from "./meta/webhook";
@@ -174,7 +175,8 @@ async function zernioInbound(
   // o tipo de coisa que só se descobre no disparo que não sai — com a campanha
   // montada e o cliente esperando. Vira aviso na Central, onde o humano já
   // procura o que está errado.
-  const aviso = avisoDoEvento(payload);
+  const idioma = await idiomaDaOrganizacao(admin, input.session.organization_id);
+  const aviso = avisoDoEvento(payload, idioma);
   if (aviso) {
     // O espelho local também: o aviso empurra para olhar, e a tela de modelos
     // precisa mostrar o estado novo. Ver o estado velho depois de ler o aviso é

@@ -31,6 +31,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { PROVIDERS_DE_MENSAGEM } from "./capabilities";
+import { copiar } from "@/lib/i18n/copiar";
+import { traduzir } from "@/lib/i18n/dicionario";
+import { idiomaDaOrganizacao } from "@/lib/i18n/idioma-da-org";
+import type { Idioma } from "@/lib/i18n/idiomas";
 
 /** Único estado em que mensagem entra e sai. Contrato do CRM (uppercase). */
 export const STATUS_SAUDAVEL = "WORKING";
@@ -95,7 +99,11 @@ export interface SaudeObservada {
  * com dois números ligados "WhatsApp desconectado" não diz QUAL — e a primeira
  * pergunta de quem lê o aviso é exatamente essa.
  */
-export function avisoDaConexao(saude: SaudeObservada, apelido: string): AvisoDeConexao | null {
+export function avisoDaConexao(
+  saude: SaudeObservada,
+  apelido: string,
+  idioma: Idioma = "pt-BR",
+): AvisoDeConexao | null {
   if (!saude.reachable) {
     // "Não deu para perguntar" tem DOIS motivos que pedem ações opostas, e
     // tratá-los igual foi o defeito medido: numa VPS real a chave do WAHA foi
@@ -111,9 +119,13 @@ export function avisoDaConexao(saude: SaudeObservada, apelido: string): AvisoDeC
       return {
         kind: "channel_number_alert",
         severity: "critical",
-        title: `Conexão "${apelido}": o servidor de WhatsApp recusou a chave de acesso`,
-        body:
+        title: copiar(idioma, 'Conexão "{apelido}": o servidor de WhatsApp recusou a chave de acesso', {
+          apelido,
+        }),
+        body: traduzir(
           "Escanear o QR não resolve: a chave que o CRM usa para falar com o servidor de WhatsApp não confere com a que o servidor espera. Enquanto isso durar, nenhuma mensagem entra nem sai por NENHUMA conexão. Quem cuida do servidor precisa conferir a WAHA_API_KEY do .env e recriar o contêiner do WhatsApp.",
+          idioma,
+        ),
         episodio: "CREDENCIAL_RECUSADA",
       };
     }
@@ -125,7 +137,7 @@ export function avisoDaConexao(saude: SaudeObservada, apelido: string): AvisoDeC
     return {
       kind: "channel_number_alert",
       severity: "warn",
-      title: `Não foi possível verificar a conexão "${apelido}"`,
+      title: copiar(idioma, 'Não foi possível verificar a conexão "{apelido}"', { apelido }),
       body: saude.detail,
       episodio: "UNREACHABLE",
     };
@@ -139,8 +151,13 @@ export function avisoDaConexao(saude: SaudeObservada, apelido: string): AvisoDeC
     return {
       kind: "qr_rescan",
       severity: "critical",
-      title: `WhatsApp "${apelido}" desconectado — precisa escanear o QR de novo`,
-      body: "Enquanto isso não acontecer, nenhuma mensagem entra nem sai por esta conexão.",
+      title: copiar(idioma, 'WhatsApp "{apelido}" desconectado — precisa escanear o QR de novo', {
+        apelido,
+      }),
+      body: traduzir(
+        "Enquanto isso não acontecer, nenhuma mensagem entra nem sai por esta conexão.",
+        idioma,
+      ),
       episodio: status,
     };
   }
@@ -148,8 +165,8 @@ export function avisoDaConexao(saude: SaudeObservada, apelido: string): AvisoDeC
   return {
     kind: "channel_number_alert",
     severity: "critical",
-    title: `WhatsApp "${apelido}" fora do ar (${status})`,
-    body: "Nenhuma mensagem entra nem sai por esta conexão até ela voltar.",
+    title: copiar(idioma, 'WhatsApp "{apelido}" fora do ar ({status})', { apelido, status }),
+    body: traduzir("Nenhuma mensagem entra nem sai por esta conexão até ela voltar.", idioma),
     episodio: status,
   };
 }
@@ -246,7 +263,8 @@ export async function sincronizarSaudeDaConexao(
    */
   origem: "varredura" | "empurrao" = "varredura",
 ): Promise<"avisado" | "ja_avisado" | "resolvido" | "sem_mudanca"> {
-  const aviso = avisoDaConexao(saude, apelido);
+  const idioma = await idiomaDaOrganizacao(admin, sessao.organization_id);
+  const aviso = avisoDaConexao(saude, apelido, idioma);
 
   const { data: linha } = await admin
     .from("channel_session_health")

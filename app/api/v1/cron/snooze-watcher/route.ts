@@ -22,6 +22,8 @@ import type { NextRequest } from "next/server";
 import { ok, fail } from "@/lib/api/wrappers";
 import { audit } from "@/lib/audit";
 import { logger } from "@/lib/logger";
+import { copiar } from "@/lib/i18n/copiar";
+import { idiomaDaOrganizacao } from "@/lib/i18n/idioma-da-org";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { autorizaCron } from "@/lib/auth/cron-auth";
 
@@ -94,7 +96,7 @@ async function handle(req: NextRequest): Promise<Response> {
         organization_id: c.organization_id,
         kind: "snooze_expired",
         severity: "warn",
-        title: "Lead não respondeu no prazo",
+        title: copiar(await idiomaDaOrganizacao(admin, c.organization_id), "Lead não respondeu no prazo"),
         ref_kind: "conversation",
         ref_id: c.id,
       });

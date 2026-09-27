@@ -1,4 +1,6 @@
 import { resolveCaseFromHuman } from "@/lib/agent-engine/agent/human-cases";
+import { copiar } from "@/lib/i18n/copiar";
+import { normalizarIdioma, type Idioma } from "@/lib/i18n/idiomas";
 import type pg from "pg";
 import { insertInboxItem } from "@/lib/agent-engine/db/repository";
 
@@ -13,14 +15,27 @@ export async function avisarRespostaDeCasoObsoleto(
     [org, caseId],
   );
   if (!rows[0]) return;
+  let idioma: Idioma = "pt-BR";
+  try {
+    const loc = await db.query<{ locale: string | null }>(
+      "select locale from organizations where id = $1",
+      [org],
+    );
+    idioma = normalizarIdioma(loc.rows[0]?.locale ?? null);
+  } catch {
+    idioma = "pt-BR";
+  }
   await insertInboxItem(
     db,
     org,
     {
       kind: "job_dead",
       severity: "warn",
-      title: "Resposta registrada; atendimento mudou",
-      body: "Resposta registrada; não repassada porque o atendimento mudou. Revise a conversa.",
+      title: copiar(idioma, "Resposta registrada; atendimento mudou"),
+      body: copiar(
+        idioma,
+        "Resposta registrada; não repassada porque o atendimento mudou. Revise a conversa.",
+      ),
       refKind: "conversation",
       refId: rows[0].conversation_id,
     },

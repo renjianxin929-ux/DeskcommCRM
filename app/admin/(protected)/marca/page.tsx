@@ -10,8 +10,15 @@ import { normalizarIdioma } from "@/lib/i18n/idiomas";
 import { traduzir } from "@/lib/i18n/dicionario";
 
 import { FormularioDaMarca } from "./_form";
+import { metadados } from "@/lib/i18n/metadados";
 
-export const metadata = { title: "Marca da instalação" };
+
+export async function generateMetadata() {
+  return metadados({
+    title: "Marca da instalação",
+  });
+}
+
 export const dynamic = "force-dynamic";
 
 /**

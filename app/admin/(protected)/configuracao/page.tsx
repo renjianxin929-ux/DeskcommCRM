@@ -11,8 +11,15 @@ import { normalizarIdioma } from "@/lib/i18n/idiomas";
 import { traduzir } from "@/lib/i18n/dicionario";
 
 import { PainelDeConfiguracao } from "./_form";
+import { metadados } from "@/lib/i18n/metadados";
 
-export const metadata = { title: "Configuração da instalação" };
+
+export async function generateMetadata() {
+  return metadados({
+    title: "Configuração da instalação",
+  });
+}
+
 export const dynamic = "force-dynamic";
 
 /**

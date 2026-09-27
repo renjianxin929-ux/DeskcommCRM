@@ -2,8 +2,15 @@ import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
 import { createClient } from "@/lib/supabase/server";
 import { idiomaDoVisitante } from "@/lib/i18n/idiomaAnonimo";
 import { traduzir } from "@/lib/i18n/dicionario";
+import { metadados } from "@/lib/i18n/metadados";
 
-export const metadata = { title: "Nova senha" };
+
+export async function generateMetadata() {
+  return metadados({
+    title: "Nova senha",
+  });
+}
+
 
 export default async function ResetPasswordPage() {
   const supabase = await createClient();

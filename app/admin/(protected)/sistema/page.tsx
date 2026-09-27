@@ -7,8 +7,15 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { traduzir } from "@/lib/i18n/dicionario";
 
 import { FormularioDeComportamento, FormularioDeModulos } from "./_form";
+import { metadados } from "@/lib/i18n/metadados";
 
-export const metadata = { title: "Comportamento da instalação" };
+
+export async function generateMetadata() {
+  return metadados({
+    title: "Comportamento da instalação",
+  });
+}
+
 export const dynamic = "force-dynamic";
 
 /**

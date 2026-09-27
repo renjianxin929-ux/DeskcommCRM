@@ -2,8 +2,15 @@ import { notFound } from "next/navigation";
 
 import { loadAuthUser } from "@/lib/auth/server";
 import { UpdatePanel } from "./_components/UpdatePanel";
+import { metadados } from "@/lib/i18n/metadados";
 
-export const metadata = { title: "Atualização do sistema" };
+
+export async function generateMetadata() {
+  return metadados({
+    title: "Atualização do sistema",
+  });
+}
+
 export const dynamic = "force-dynamic";
 
 /**

@@ -49,7 +49,9 @@ vi.mock("@/lib/supabase/admin", () => ({
             ? avisoAbertoNaCentral
             : tabela === "ai_agent_versions"
               ? agenteComVideo
-              : messageRow;
+              : tabela === "organizations"
+                ? { locale: "pt-BR" }
+                : messageRow;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const terminais: any = {
         maybeSingle: async () => ({ data: linha, error: null }),

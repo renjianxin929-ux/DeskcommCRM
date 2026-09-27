@@ -22,7 +22,6 @@
  * venda inteira da landing. `tests/e2e/qa-titulos-das-telas.spec.ts` mede isso
  * por ferramenta (`page.title()`), e esta rota entrou na lista dele.
  */
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { requireAuth, resolveActiveOrg } from "@/lib/auth/server";
@@ -30,9 +29,16 @@ import { ROLE_RANK } from "@/lib/auth/types";
 import { traduzir } from "@/lib/i18n/dicionario";
 
 import { AvisoNoWhatsApp } from "./_components/AvisoNoWhatsApp";
+import { metadados } from "@/lib/i18n/metadados";
+
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Aviso no WhatsApp" };
+export async function generateMetadata() {
+  return metadados({
+    title: "Aviso no WhatsApp",
+  });
+}
+
 
 export default async function AvisoDeCasoPage() {
   const user = await requireAuth();

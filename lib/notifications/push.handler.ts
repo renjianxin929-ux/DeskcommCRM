@@ -6,16 +6,37 @@ import { enviarPushAoUsuario, enviarPushDaOrg } from "./web_push";
 import { vapidPronto } from "./vapid";
 import type { PushPayload } from "./push_payload";
 import { rotuloDoContato, SEM_NOME } from "@/lib/contacts/rotulo-do-contato";
+import { traduzir } from "@/lib/i18n/dicionario";
+import { idiomaDaOrganizacao } from "@/lib/i18n/idioma-da-org";
+import { normalizarIdioma, type Idioma } from "@/lib/i18n/idiomas";
 
 export const WEB_PUSH_INBOUND_KEY = "web-push-inbound.v1";
+
+async function idiomaDoDestino(organizationId: string, userId: string | null): Promise<Idioma> {
+  const admin = createAdminClient();
+  if (userId) {
+    try {
+      const { data, error } = await admin.auth.admin.getUserById(userId);
+      if (!error) {
+        const bruto = (data.user?.user_metadata as { locale?: unknown } | undefined)?.locale;
+        if (typeof bruto === "string" && bruto.trim()) return normalizarIdioma(bruto);
+      }
+    } catch {
+      // Sem o perfil, o aviso segue o idioma da organização.
+    }
+  }
+  return idiomaDaOrganizacao(admin, organizationId);
+}
 
 async function handleInbound(row: EventRow): Promise<HandlerResult> {
   const conversationId =
     (typeof row.payload.conversation_id === "string" ? row.payload.conversation_id : null) ?? null;
+  const idioma = await idiomaDaOrganizacao(createAdminClient(), row.organization_id);
   const previewRaw = row.payload.body_preview;
-  const preview = typeof previewRaw === "string" && previewRaw.trim() ? previewRaw : "Nova mensagem";
+  const preview =
+    typeof previewRaw === "string" && previewRaw.trim() ? previewRaw : traduzir("Nova mensagem", idioma);
   const type = typeof row.payload.type === "string" ? row.payload.type : "text";
-  const body = type === "text" ? preview : "Mídia";
+  const body = type === "text" ? preview : traduzir("Mídia", idioma);
 
   const marca = await marcaDaSaida(row.organization_id);
   const contactId = typeof row.payload.contact_id === "string" ? row.payload.contact_id : null;
@@ -62,12 +83,17 @@ async function handleInbound(row: EventRow): Promise<HandlerResult> {
     preview: body,
     contactName,
     icon,
+    idioma,
   });
   const { sent } = await enviarPushDaOrg(row.organization_id, payload);
   return { consumer_key: WEB_PUSH_INBOUND_KEY, status: "ok", detail: `sent:${sent}` };
 }
 
-async function leadBits(organizationId: string, leadId: string): Promise<{
+async function leadBits(
+  organizationId: string,
+  leadId: string,
+  idioma: Idioma,
+): Promise<{
   title: string;
   ownerUserId: string | null;
   pipelineId: string | null;
@@ -85,7 +111,7 @@ async function leadBits(organizationId: string, leadId: string): Promise<{
     pipeline_id?: string | null;
   } | null;
   return {
-    title: row?.title?.trim() || "Lead",
+    title: row?.title?.trim() || traduzir("Lead", idioma),
     ownerUserId: row?.owner_user_id ?? null,
     pipelineId: row?.pipeline_id ?? null,
   };
@@ -120,10 +146,11 @@ export const webPushInboundHandler: EventHandler = {
       const toUserId = typeof row.payload.to_user_id === "string" ? row.payload.to_user_id : null;
       const conversationId =
         typeof row.payload.conversation_id === "string" ? row.payload.conversation_id : null;
-      const preview =
-        typeof row.payload.body_preview === "string" ? row.payload.body_preview : "Você foi mencionado";
+      const idioma = await idiomaDoDestino(row.organization_id, toUserId);
+      const cru = typeof row.payload.body_preview === "string" ? row.payload.body_preview : "";
+      const preview = cru.trim() ? cru : traduzir("Você foi mencionado", idioma);
       return enviarParaUsuario(row.organization_id, toUserId, {
-        title: "Você foi mencionado",
+        title: traduzir("Você foi mencionado", idioma),
         body: truncar(preview),
         tag: conversationId ? `mention:${conversationId}` : "mention",
         href: conversationId ? `/app/inbox/${conversationId}` : "/app/inbox",
@@ -136,29 +163,35 @@ export const webPushInboundHandler: EventHandler = {
     if (!leadId) {
       return { consumer_key: WEB_PUSH_INBOUND_KEY, status: "skipped", detail: "sem_lead" };
     }
-    const lead = await leadBits(row.organization_id, leadId);
+    const pedido =
+      typeof row.payload.to_user_id === "string" ? row.payload.to_user_id : null;
+    const lead = await leadBits(row.organization_id, leadId, "pt-BR");
     const href = hrefDoLead(lead.pipelineId);
+    const destinatario =
+      row.event_type === "lead.assigned" ? pedido ?? lead.ownerUserId : lead.ownerUserId;
+    const idiomaDoLead = await idiomaDoDestino(row.organization_id, destinatario);
+    const tituloDoLead = lead.title === "Lead" ? traduzir("Lead", idiomaDoLead) : lead.title;
 
     if (row.event_type === "lead.assigned") {
-      const toUserId = typeof row.payload.to_user_id === "string" ? row.payload.to_user_id : lead.ownerUserId;
+      const toUserId = destinatario;
       return enviarParaUsuario(row.organization_id, toUserId, {
-        title: "Lead atribuído a você",
-        body: truncar(lead.title),
+        title: traduzir("Lead atribuído a você", idiomaDoLead),
+        body: truncar(tituloDoLead),
         tag: `lead-assigned:${leadId}`,
         href,
       });
     }
     if (row.event_type === "lead.won") {
       return enviarParaUsuario(row.organization_id, lead.ownerUserId, {
-        title: "Lead ganho",
-        body: truncar(lead.title),
+        title: traduzir("Lead ganho", idiomaDoLead),
+        body: truncar(tituloDoLead),
         tag: `lead-won:${leadId}`,
         href,
       });
     }
     return enviarParaUsuario(row.organization_id, lead.ownerUserId, {
-      title: "Lead perdido",
-      body: truncar(lead.title),
+      title: traduzir("Lead perdido", idiomaDoLead),
+      body: truncar(tituloDoLead),
       tag: `lead-lost:${leadId}`,
       href,
     });

@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
 
 import { VitrineDaAgenda } from "./_client";
+import { metadados } from "@/lib/i18n/metadados";
+
 
 /**
  * Vitrine do kit visual da Agenda — componentes com dados de mentira.
@@ -16,13 +17,13 @@ import { VitrineDaAgenda } from "./_client";
  * navegação (`tests/unit/navegacao-completude.test.ts`), e uma vitrine no menu
  * do cliente seria exatamente o tipo de tela que não deveria estar lá.
  */
-export const metadata: Metadata = {
-  // Sem o nome do produto: a catraca de marca só encolhe (`tests/unit/branding.test.ts`),
-  // e ela está certa — um revendedor que instala com a marca dele teria o NOSSO
-  // nome numa página do produto DELE. Fui eu quem escreveu; a página é minha.
-  title: "Kit visual da Agenda",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata() {
+  return metadados({
+    title: "Kit visual da Agenda",
+    robots: { index: false, follow: false },
+  });
+}
+
 
 export default function VitrineDaAgendaPage() {
   return <VitrineDaAgenda />;

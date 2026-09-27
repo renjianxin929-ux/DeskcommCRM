@@ -7,8 +7,15 @@ import { tagDeIdioma } from "@/lib/i18n/datas";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 import { FormularioDoGoogle } from "./_form";
+import { metadados } from "@/lib/i18n/metadados";
 
-export const metadata = { title: "Google Agenda da instalação" };
+
+export async function generateMetadata() {
+  return metadados({
+    title: "Google Agenda da instalação",
+  });
+}
+
 export const dynamic = "force-dynamic";
 
 /**

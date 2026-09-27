@@ -19,7 +19,10 @@ import { TIPOS_DERIVAVEIS } from "@/lib/messaging/media/derivable";
 import { deriveVideoText } from "@/lib/messaging/media/video-derive";
 import { apiTranscriptionProvider } from "@/lib/messaging/media/transcription";
 import { logger } from "@/lib/logger";
+import { copiar } from "@/lib/i18n/copiar";
+import { traduzir } from "@/lib/i18n/dicionario";
 import { idiomaDaOrganizacao } from "@/lib/i18n/idioma-da-org";
+import type { Idioma } from "@/lib/i18n/idiomas";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { motivoDaRecusaDeDestino } from "@/lib/automation/destinos-internos-autorizados";
 import { DETALHE_TECNICO } from "@/lib/event-log/aviso-de-evento-morto";
@@ -414,11 +417,15 @@ function buildDeriveDeps(
       // `{image:false}` por conservadorismo — afirmar ao operador que ele "não
       // enxerga imagens" seria gravar uma alegação que ninguém verificou (e
       // era o que acontecia com todo modelo da OpenRouter).
+      const modelo = llm.defaultModel;
       const motivo = visao.sabemos
-        ? `o modelo ${llm.defaultModel ?? "configurado"} não enxerga imagens`
-        : `não sei se o modelo ${llm.defaultModel ?? "configurado"} enxerga imagens, ` +
-          `então não arrisquei enviar a foto — escolha um modelo do catálogo em Agente de IA → Provedores`;
-      await avisarMidiaNaoLida(orgId, "imagem", motivo);
+        ? modelo
+          ? "o modelo {modelo} não enxerga imagens"
+          : "o modelo configurado não enxerga imagens"
+        : modelo
+          ? "não sei se o modelo {modelo} enxerga imagens, então não arrisquei enviar a foto — escolha um modelo do catálogo em Agente de IA → Provedores"
+          : "não sei se o modelo configurado enxerga imagens, então não arrisquei enviar a foto — escolha um modelo do catálogo em Agente de IA → Provedores";
+      await avisarMidiaNaoLida(orgId, "imagem", motivo, undefined, undefined, modelo ? { modelo } : undefined);
       return MARCADOR_NAO_LIDA;
     }
     // O endereço é escolhido por quem administra a instalação (o campo de
@@ -453,7 +460,14 @@ function buildDeriveDeps(
     }
     const factory = registry[llm.provider];
     if (!factory) {
-      await avisarMidiaNaoLida(orgId, "imagem", `o provedor ${llm.provider} não está disponível nesta instalação`);
+      await avisarMidiaNaoLida(
+        orgId,
+        "imagem",
+        "o provedor {provedor} não está disponível nesta instalação",
+        undefined,
+        undefined,
+        { provedor: llm.provider },
+      );
       return MARCADOR_NAO_LIDA;
     }
     const res = await generateText({
@@ -573,13 +587,22 @@ export function textoDoAvisoDeMidiaNaoLida(aviso: {
   motivo: string;
   consequencia: string;
   detalheTecnico?: string;
+  idioma?: Idioma;
+  vars?: Record<string, string | number>;
 }): { title: string; body: string } {
+  const idioma = aviso.idioma ?? "pt-BR";
+  const motivo = copiar(idioma, aviso.motivo, aviso.vars ?? {});
+  const consequencia = traduzir(aviso.consequencia, idioma);
   return {
-    title: `O agente não conseguiu ler ${aviso.tipo} que o cliente enviou`,
+    title: copiar(idioma, "O agente não conseguiu ler {tipo} que o cliente enviou", {
+      tipo: traduzir(aviso.tipo, idioma),
+    }),
     body:
-      `Motivo: ${aviso.motivo}. ${aviso.consequencia} ` +
-      `Para resolver, ajuste o modelo desse ponto em Agente de IA → Provedores, ou cadastre a chave necessária em Credenciais.` +
-      (aviso.detalheTecnico ? ` ${DETALHE_TECNICO} ${aviso.detalheTecnico}` : ""),
+      copiar(
+        idioma,
+        "Motivo: {motivo}. {consequencia} Para resolver, ajuste o modelo desse ponto em Agente de IA → Provedores, ou cadastre a chave necessária em Credenciais.",
+        { motivo, consequencia },
+      ) + (aviso.detalheTecnico ? ` ${traduzir(DETALHE_TECNICO, idioma)} ${aviso.detalheTecnico}` : ""),
   };
 }
 
@@ -594,9 +617,11 @@ async function avisarMidiaNaoLida(
   consequencia = "Enquanto isso, o agente responde avisando que não conseguiu abrir o arquivo.",
   /** A frase crua do provedor ou do armazenamento, quando houver — vai no fim, rotulada. */
   detalheTecnico?: string,
+  vars?: Record<string, string | number>,
 ): Promise<void> {
   try {
     const admin = createAdminClient();
+    const idioma = await idiomaDaOrganizacao(admin, organizationId);
     const { data: jaAberto } = await admin
       .from("agent_inbox_items")
       .select("id")
@@ -615,7 +640,7 @@ async function avisarMidiaNaoLida(
       organization_id: organizationId,
       kind: "midia_nao_lida",
       severity: "warn",
-      ...textoDoAvisoDeMidiaNaoLida({ tipo, motivo, consequencia, detalheTecnico }),
+      ...textoDoAvisoDeMidiaNaoLida({ tipo, motivo, consequencia, detalheTecnico, idioma, vars }),
     });
     // E o retorno é CONFERIDO. O supabase-js devolve `{ error }` em vez de
     // lançar, então o `catch` abaixo era inalcançável para erro de banco: a

@@ -28,6 +28,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { SaudeObservada } from "../health";
+import { copiar } from "@/lib/i18n/copiar";
+import { traduzir } from "@/lib/i18n/dicionario";
+import type { Idioma } from "@/lib/i18n/idiomas";
 
 export interface AvisoDeCanal {
   kind: "channel_template_review" | "channel_number_alert";
@@ -83,7 +86,7 @@ const GRAVIDADE_DO_NUMERO: Record<string, { sev: "info" | "warn" | "critical"; t
 };
 
 /** O evento merece um aviso? `null` quando não é dos nossos. */
-export function avisoDoEvento(payload: unknown): AvisoDeCanal | null {
+export function avisoDoEvento(payload: unknown, idioma: Idioma = "pt-BR"): AvisoDeCanal | null {
   const p = obj(payload);
   if (!p) return null;
   const evento = str(p.event) ?? "";
@@ -96,7 +99,7 @@ export function avisoDoEvento(payload: unknown): AvisoDeCanal | null {
     return {
       kind: "channel_template_review",
       severity: GRAVIDADE_DO_TEMPLATE[estado] ?? "warn",
-      title: `Modelo "${nome}": ${estado}`,
+      title: copiar(idioma, 'Modelo "{nome}": {estado}', { nome, estado }),
       // "NONE" é como a plataforma diz "sem motivo" — repassá-lo seria mostrar
       // ruído no lugar onde o operador procura a explicação.
       body: motivo && motivo.toUpperCase() !== "NONE" ? motivo : null,
@@ -109,7 +112,7 @@ export function avisoDoEvento(payload: unknown): AvisoDeCanal | null {
     return {
       kind: "channel_number_alert",
       severity: numero.sev,
-      title: numero.texto,
+      title: traduzir(numero.texto, idioma),
       body: detalhe,
     };
   }

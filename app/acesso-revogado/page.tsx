@@ -4,8 +4,15 @@ import { createClient } from "@/lib/supabase/server";
 import { idiomaDoVisitante } from "@/lib/i18n/idiomaAnonimo";
 import { traduzir } from "@/lib/i18n/dicionario";
 import { signOut } from "@/app/actions/auth/signOut";
+import { metadados } from "@/lib/i18n/metadados";
 
-export const metadata = { title: "Acesso revogado" };
+
+export async function generateMetadata() {
+  return metadados({
+    title: "Acesso revogado",
+  });
+}
+
 
 /**
  * Tela terminal de quem TINHA acesso e não tem mais.

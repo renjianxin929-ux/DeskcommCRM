@@ -1,12 +1,18 @@
-import type { Metadata } from "next";
 import { NavHub } from "@/components/shell/NavHub";
 import { requireAuth, resolveActiveOrg } from "@/lib/auth/server";
 import { traduzir } from "@/lib/i18n/dicionario";
 import { modulosLigados } from "@/lib/instalacao/modulos";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { metadados } from "@/lib/i18n/metadados";
+
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Configurações" };
+export async function generateMetadata() {
+  return metadados({
+    title: "Configurações",
+  });
+}
+
 
 /**
  * Hub de Organização.

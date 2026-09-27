@@ -38,8 +38,15 @@ import { createClient } from "@/lib/supabase/server";
 import { traduzir } from "@/lib/i18n/dicionario";
 
 import { FormularioDaMarcaDaOrganizacao } from "./_form";
+import { metadados } from "@/lib/i18n/metadados";
 
-export const metadata = { title: "Marca" };
+
+export async function generateMetadata() {
+  return metadados({
+    title: "Marca",
+  });
+}
+
 export const dynamic = "force-dynamic";
 
 export default async function MarcaDaOrganizacaoPage() {

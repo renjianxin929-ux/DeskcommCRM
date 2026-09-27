@@ -46,6 +46,8 @@ import {
   telefoneDoEmbed,
   type EmbedDoContato,
 } from "@/lib/messaging/falha-de-entrega";
+import { copiar } from "@/lib/i18n/copiar";
+import { idiomaDaOrganizacao } from "@/lib/i18n/idioma-da-org";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { autorizaCron } from "@/lib/auth/cron-auth";
 
@@ -186,12 +188,13 @@ export async function recoverStuckMessages(
       severity: "critical",
       title:
         n === 1
-          ? "Uma resposta não chegou ao cliente"
-          : `${n} respostas não chegaram ao cliente`,
-      body:
-        `Ficaram mais de ${STUCK_AFTER_MS / 60000} minutos aguardando envio e foram marcadas como falha. ` +
-        `Verifique se a conexão do WhatsApp está ativa e se o worker de envio está rodando. ` +
-        `Nada foi reenviado automaticamente — reenviar sem saber a causa arrisca mandar a mesma mensagem duas vezes.`,
+          ? copiar(await idiomaDaOrganizacao(admin, orgId), "Uma resposta não chegou ao cliente")
+          : copiar(await idiomaDaOrganizacao(admin, orgId), "{n} respostas não chegaram ao cliente", { n }),
+      body: copiar(
+        await idiomaDaOrganizacao(admin, orgId),
+        "Ficaram mais de {minutos} minutos aguardando envio e foram marcadas como falha. Verifique se a conexão do WhatsApp está ativa e se o worker de envio está rodando. Nada foi reenviado automaticamente — reenviar sem saber a causa arrisca mandar a mesma mensagem duas vezes.",
+        { minutos: STUCK_AFTER_MS / 60000 },
+      ),
       ref_kind: "conversation",
       ref_id: mensagens[0]?.conversation_id ?? null,
     });

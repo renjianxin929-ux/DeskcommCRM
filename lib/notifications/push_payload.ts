@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+import { traduzir } from "@/lib/i18n/dicionario";
+import type { Idioma } from "@/lib/i18n/idiomas";
+
 export const PUSH_PAYLOAD_MAX = 140;
 
 export const pushPayloadSchema = z.object({
@@ -18,8 +21,10 @@ export function montarPayloadDeInbound(input: {
   preview: string;
   contactName?: string | null;
   icon?: string | null;
+  idioma?: Idioma;
 }): PushPayload {
-  const title = input.contactName?.trim() || "Nova mensagem";
+  const idioma = input.idioma ?? "pt-BR";
+  const title = input.contactName?.trim() || traduzir("Nova mensagem", idioma);
   void input.brand;
   const body = truncar(input.preview);
   const tag = input.conversationId ? `msg:${input.conversationId}` : "msg";

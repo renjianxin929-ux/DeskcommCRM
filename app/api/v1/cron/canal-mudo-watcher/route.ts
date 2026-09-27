@@ -39,6 +39,8 @@ import {
   type MotivoDaResolucao,
 } from "@/lib/channels/canal-mudo";
 import { logger } from "@/lib/logger";
+import { copiar } from "@/lib/i18n/copiar";
+import { idiomaDaOrganizacao } from "@/lib/i18n/idioma-da-org";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { autorizaCron } from "@/lib/auth/cron-auth";
 
@@ -63,6 +65,7 @@ const MOTIVO_LEGIVEL: Record<MotivoDaResolucao, string> = {
 interface AvisoAberto {
   id: string;
   ref_id: string | null;
+  organization_id: string;
 }
 
 async function handle(req: NextRequest): Promise<Response> {
@@ -79,7 +82,7 @@ async function handle(req: NextRequest): Promise<Response> {
   // precisar ser fechado, inclusive de canal que sumiu da varredura (arquivado).
   const { data: abertosBruto, error: erroAvisos } = await admin
     .from("agent_inbox_items")
-    .select("id, ref_id")
+    .select("id, ref_id, organization_id")
     .eq("kind", KIND_CANAL_MUDO)
     .eq("status", "open")
     .limit(LIMITE);
@@ -116,11 +119,14 @@ async function handle(req: NextRequest): Promise<Response> {
   let resolvidos = 0;
 
   const resolver = async (aviso: AvisoAberto, motivo: MotivoDaResolucao): Promise<void> => {
+    const idioma = await idiomaDaOrganizacao(admin, aviso.organization_id);
     const { data } = await admin
       .from("agent_inbox_items")
       .update({
         status: "resolved",
-        body: `${CORPO_DO_AVISO}\n\nResolvido pelo sistema: ${MOTIVO_LEGIVEL[motivo]}.`,
+        body: `${copiar(idioma, CORPO_DO_AVISO)}\n\n${copiar(idioma, "Resolvido pelo sistema: {motivo}.", {
+          motivo: copiar(idioma, MOTIVO_LEGIVEL[motivo]),
+        })}`,
       })
       .eq("id", aviso.id)
       // O `status` no filtro é a trava: duas rodadas simultâneas (cron + curl à
@@ -142,6 +148,7 @@ async function handle(req: NextRequest): Promise<Response> {
     }
     if (desfecho.acao === "aguardar" || aberto) continue;
 
+    const idioma = await idiomaDaOrganizacao(admin, canal.organization_id);
     const { data } = await admin
       .from("agent_inbox_items")
       .insert({
@@ -151,8 +158,10 @@ async function handle(req: NextRequest): Promise<Response> {
         // assim de propósito. Crítico aqui gastaria o alarme que a Central
         // reserva para o que já custou dinheiro ou cliente.
         severity: "warn",
-        title: "Este canal está em modo de teste — a IA não responde ninguém",
-        body: `${CORPO_DO_AVISO}\n\nAssim há ${desfecho.diasMudo} dia(s).`,
+        title: copiar(idioma, "Este canal está em modo de teste — a IA não responde ninguém"),
+        body: `${copiar(idioma, CORPO_DO_AVISO)}\n\n${copiar(idioma, "Assim há {n} dia(s).", {
+          n: desfecho.diasMudo,
+        })}`,
         ref_kind: "channel_session",
         ref_id: canal.id,
       })

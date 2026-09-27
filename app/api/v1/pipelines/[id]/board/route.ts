@@ -17,7 +17,9 @@ import { type NextRequest } from "next/server";
 
 import { fail, ok } from "@/lib/api/wrappers";
 import { loadAuthUser } from "@/lib/auth/server";
+import { copiar } from "@/lib/i18n/copiar";
 import { traduzir } from "@/lib/i18n/dicionario";
+import { idiomaDaOrganizacao } from "@/lib/i18n/idioma-da-org";
 import {
   roteiaProximasAcoes,
   type EstadoDoContato,
@@ -155,14 +157,23 @@ async function avisaAmbiguas(
     ((jaAbertos ?? []) as Array<{ ref_id: string }>).map((r) => r.ref_id),
   );
 
+  const idioma = await idiomaDaOrganizacao(supabase, organizationId);
   const novos = ambiguas
     .filter((a) => !abertos.has(a.contact_id))
     .map((a) => ({
       organization_id: organizationId,
       kind: "next_action_ambiguous",
       severity: "warn",
-      title: `A IA propôs uma próxima ação, mas o contato tem ${a.candidateIds.length} negócios abertos`,
-      body: `Proposta: "${a.texto}". Escolha a qual negócio ela pertence — o sistema não adivinha para não executar no negócio errado.`,
+      title: copiar(
+        idioma,
+        "A IA propôs uma próxima ação, mas o contato tem {n} negócios abertos",
+        { n: a.candidateIds.length },
+      ),
+      body: copiar(
+        idioma,
+        'Proposta: "{texto}". Escolha a qual negócio ela pertence — o sistema não adivinha para não executar no negócio errado.',
+        { texto: a.texto },
+      ),
       ref_kind: "contact",
       ref_id: a.contact_id,
       status: "open",

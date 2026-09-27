@@ -18,8 +18,15 @@ import { requireAuth, resolveActiveOrg } from "@/lib/auth/server";
 import { ROLE_RANK } from "@/lib/auth/types";
 import { traduzir } from "@/lib/i18n/dicionario";
 import { createClient } from "@/lib/supabase/server";
+import { metadados } from "@/lib/i18n/metadados";
 
-export const metadata = { title: "Dados externos" };
+
+export async function generateMetadata() {
+  return metadados({
+    title: "Dados externos",
+  });
+}
+
 export const dynamic = "force-dynamic";
 
 const COLUNAS_SEGURAS =

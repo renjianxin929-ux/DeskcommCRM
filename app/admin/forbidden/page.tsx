@@ -4,8 +4,15 @@ import { Card } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 import { idiomaDoVisitante } from "@/lib/i18n/idiomaAnonimo";
 import { traduzir } from "@/lib/i18n/dicionario";
+import { metadados } from "@/lib/i18n/metadados";
 
-export const metadata = { title: "Acesso negado — Admin Plataforma" };
+
+export async function generateMetadata() {
+  return metadados({
+    title: "Acesso negado — Admin Plataforma",
+  });
+}
+
 
 export default async function AdminForbiddenPage() {
   // Página sem `requirePlatformAdmin()` (é o próprio destino do redirect dele)

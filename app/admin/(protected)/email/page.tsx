@@ -8,8 +8,15 @@ import { estadoParaTela } from "@/lib/instalacao/config";
 import { normalizarIdioma } from "@/lib/i18n/idiomas";
 
 import { FormularioDeSmtp } from "./_form";
+import { metadados } from "@/lib/i18n/metadados";
 
-export const metadata = { title: "Servidor de e-mail da instalação" };
+
+export async function generateMetadata() {
+  return metadados({
+    title: "Servidor de e-mail da instalação",
+  });
+}
+
 export const dynamic = "force-dynamic";
 
 /**

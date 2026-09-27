@@ -6,8 +6,15 @@ import { branding } from "@/lib/branding";
 import { createClient } from "@/lib/supabase/server";
 import { idiomaDoVisitante } from "@/lib/i18n/idiomaAnonimo";
 import { traduzir } from "@/lib/i18n/dicionario";
+import { metadados } from "@/lib/i18n/metadados";
 
-export const metadata = { title: "Entrar" };
+
+export async function generateMetadata() {
+  return metadados({
+    title: "Entrar",
+  });
+}
+
 
 export default async function LoginPage({
   searchParams,

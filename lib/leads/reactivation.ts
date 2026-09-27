@@ -1,5 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { copiar } from "@/lib/i18n/copiar";
+import { idiomaDaOrganizacao } from "@/lib/i18n/idioma-da-org";
 import { emitLeadActivity } from "@/lib/leads/activity-emitter";
 import { registraFalhaDeAtividade } from "@/lib/leads/activity-write-failure";
 
@@ -196,12 +198,23 @@ export async function venceReativacoes(
           organization_id: organizationId,
           kind: "reactivation_expired",
           severity: "warn",
-          title: `Decida sobre ${r.vencidas} ${r.vencidas === 1 ? "negócio parado" : "negócios parados"} — a sugestão de retomar venceu`,
+          title: copiar(
+            await idiomaDaOrganizacao(admin, organizationId),
+            r.vencidas === 1
+              ? "Decida sobre {n} negócio parado — a sugestão de retomar venceu"
+              : "Decida sobre {n} negócios parados — a sugestão de retomar venceu",
+            { n: r.vencidas },
+          ),
           body:
-            `${r.vencidas === 1 ? "Um negócio esfriou" : `${r.vencidas} negócios esfriaram`} e a sugestão de ` +
-            `retomar contato ficou sem resposta até o prazo. Eles saíram do quadro para não ` +
-            `parecerem em andamento. Retomar ou encerrar — as duas são decisões; deixar como ` +
-            `está é a única que não é.`,
+            (r.vencidas === 1
+              ? copiar(await idiomaDaOrganizacao(admin, organizationId), "Um negócio esfriou")
+              : copiar(await idiomaDaOrganizacao(admin, organizationId), "{n} negócios esfriaram", {
+                  n: r.vencidas,
+                })) +
+            copiar(
+              await idiomaDaOrganizacao(admin, organizationId),
+              " e a sugestão de retomar contato ficou sem resposta até o prazo. Eles saíram do quadro para não parecerem em andamento. Retomar ou encerrar — as duas são decisões; deixar como está é a única que não é.",
+            ),
           ref_kind: "organization",
           ref_id: organizationId,
         })

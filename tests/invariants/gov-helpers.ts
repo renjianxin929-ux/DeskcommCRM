@@ -161,8 +161,8 @@ export function seedGov(): void {
 
   sql(`
     ${users}
-    insert into public.organizations (id, slug, legal_name, display_name)
-      values ('${GOV_ORG}', 'gov-inv', 'Gov Invariant Org', 'Gov Inv')
+    insert into public.organizations (id, slug, legal_name, display_name, locale)
+      values ('${GOV_ORG}', 'gov-inv', 'Gov Invariant Org', 'Gov Inv', 'pt-BR')
       on conflict do nothing;
     ${memberships}
     -- DO + exception (não ON CONFLICT): channel_sessions tem unique DEFERRABLE

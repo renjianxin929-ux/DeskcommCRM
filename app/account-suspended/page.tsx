@@ -5,10 +5,15 @@ import { Card } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 import { idiomaDoVisitante } from "@/lib/i18n/idiomaAnonimo";
 import { traduzir } from "@/lib/i18n/dicionario";
+import { metadados } from "@/lib/i18n/metadados";
 
-export const metadata = {
-  title: "Conta suspensa",
-};
+
+export async function generateMetadata() {
+  return metadados({
+    title: "Conta suspensa",
+  });
+}
+
 
 /**
  * Esta tela entregava o NOSSO endereço de suporte ao cliente de um revendedor —

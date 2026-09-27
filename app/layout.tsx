@@ -19,6 +19,8 @@ import {
   type MarcaResolvida,
 } from "@/lib/branding/resolve";
 import { env } from "@/lib/env";
+import { traduzir } from "@/lib/i18n/dicionario";
+import { idiomaDaRequisicao } from "@/lib/i18n/metadados";
 import { logger } from "@/lib/logger";
 import { ThemeProvider } from "@/lib/theme";
 import { Providers } from "./providers";
@@ -85,16 +87,22 @@ async function marcaResolvida(): Promise<{
 export async function generateMetadata(): Promise<Metadata> {
   const { marca } = await marcaResolvida();
   const { name } = marca;
+  const idioma = await idiomaDaRequisicao();
+  const frase = traduzir("atendimento e vendas por WhatsApp com agentes de IA", idioma);
   return {
     title: {
-      default: `${name} — atendimento e vendas por WhatsApp com agentes de IA`,
+      default: `${name} — ${frase}`,
       template: `%s · ${name}`,
     },
-    description:
+    description: traduzir(
       "Centralize o atendimento por WhatsApp num funil só. Agentes de IA resolvem o que dá pra resolver e passam para o time humano o que importa — com tudo registrado. Multi-tenant, LGPD-nativo, feito para operações brasileiras.",
+      idioma,
+    ),
     applicationName: name,
     authors: [{ name }],
-    keywords: ["CRM", "atendimento", "WhatsApp", "IA conversacional", "LGPD", "multi-tenant"],
+    keywords: ["CRM", "atendimento", "WhatsApp", "IA conversacional", "LGPD", "multi-tenant"].map((palavra) =>
+      traduzir(palavra, idioma),
+    ),
     robots: { index: false, follow: false },
     // Sem esta linha o navegador pede `/favicon.ico`, que não existe: medido em
     // produção, o 404 é a `app/not-found.tsx` INTEIRA (19.435 bytes de HTML)

@@ -1,10 +1,16 @@
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireAuth, resolveActiveOrg } from "@/lib/auth/server";
 import { ProspectingClient } from "./_client";
+import { metadados } from "@/lib/i18n/metadados";
+
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Prospecção" };
+export async function generateMetadata() {
+  return metadados({
+    title: "Prospecção",
+  });
+}
+
 export default async function ProspectingPage() {
   const user = await requireAuth();
   const org = await resolveActiveOrg(user);

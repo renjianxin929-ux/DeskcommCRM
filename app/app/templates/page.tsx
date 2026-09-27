@@ -1,12 +1,18 @@
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireAuth, resolveActiveOrg } from "@/lib/auth/server";
 import { traduzir } from "@/lib/i18n/dicionario";
 import { ROLE_RANK } from "@/lib/auth/types";
 import { TemplatesClient } from "./_components/TemplatesClient";
+import { metadados } from "@/lib/i18n/metadados";
+
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Respostas rápidas" };
+export async function generateMetadata() {
+  return metadados({
+    title: "Respostas rápidas",
+  });
+}
+
 
 export default async function TemplatesPage() {
   const user = await requireAuth();

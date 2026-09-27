@@ -34,8 +34,15 @@ import { existeConexaoDeLeitura } from "@/lib/plataformas-de-anuncio/credenciais
 import { createAdminClient } from "@/lib/supabase/admin";
 
 import { FormularioDeMetaAds } from "./_form";
+import { metadados } from "@/lib/i18n/metadados";
 
-export const metadata = { title: "Meta Ads" };
+
+export async function generateMetadata() {
+  return metadados({
+    title: "Meta Ads",
+  });
+}
+
 export const dynamic = "force-dynamic";
 
 export default async function MetaAdsSettingsPage() {

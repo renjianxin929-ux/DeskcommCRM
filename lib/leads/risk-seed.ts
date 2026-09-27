@@ -1,3 +1,5 @@
+import { copiar } from "@/lib/i18n/copiar";
+import { idiomaDaOrganizacao } from "@/lib/i18n/idioma-da-org";
 import { protecaoAgendaSupabase } from "@/lib/agenda/protecao-followup";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -248,12 +250,18 @@ export async function semeiaEstadosDeRisco(
         severity: emRisco > 10 ? "warn" : "info",
         // A AÇÃO VAI NO TÍTULO. "48 negócios em risco" é um número e não move
         // ninguém; o item precisa dizer o que fazer com ele.
-        title: `Revise ${emRisco} ${emRisco === 1 ? "negócio parado" : "negócios parados"} e decida quais encerrar`,
-        body:
-          `${porBucket.critico} sem resposta há muito tempo e ${porBucket.em_risco} esfriando. ` +
-          `Eles já estavam assim antes de o sistema passar a acompanhar — por isso ` +
-          `aparecem juntos agora, e não porque algo aconteceu hoje. ` +
-          `Encerrar o que morreu é o que faz o radar voltar a significar alguma coisa.`,
+        title: copiar(
+          await idiomaDaOrganizacao(admin, organizationId),
+          emRisco === 1
+            ? "Revise {n} negócio parado e decida quais encerrar"
+            : "Revise {n} negócios parados e decida quais encerrar",
+          { n: emRisco },
+        ),
+        body: copiar(
+          await idiomaDaOrganizacao(admin, organizationId),
+          "{critico} sem resposta há muito tempo e {em_risco} esfriando. Eles já estavam assim antes de o sistema passar a acompanhar — por isso aparecem juntos agora, e não porque algo aconteceu hoje. Encerrar o que morreu é o que faz o radar voltar a significar alguma coisa.",
+          { critico: porBucket.critico, em_risco: porBucket.em_risco },
+        ),
         ref_kind: "organization",
         ref_id: organizationId,
       })
