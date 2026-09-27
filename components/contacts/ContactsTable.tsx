@@ -198,7 +198,7 @@ export function ContactsTable({ contacts, orderBy, orderDir, onSort }: Props) {
           <TableRow key={c.id} className="cursor-pointer">
             <TableCell className="font-medium">
               <Link href={`/app/contacts/${c.id}`} className="hover:underline">
-                {displayName(c)}
+                {displayName(c, t)}
               </Link>
             </TableCell>
             <TableCell className="text-muted-foreground">
