@@ -281,10 +281,14 @@ async function MarcaDosClientComponents({ children }: { children: React.ReactNod
   );
 }
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  // O `<html lang>` acompanha a mesma resolução do título. Sem isto o documento
+  // nasce `pt-BR` e só as telas que montam `IdiomaProvider` corrigem no cliente —
+  // termos e privacidade ficavam com a língua errada para o leitor de tela.
+  const idioma = await idiomaDaRequisicao();
   return (
     <html
-      lang="pt-BR"
+      lang={idioma}
       data-theme="light"
       suppressHydrationWarning
       className={`${atkinson.variable} ${plexMono.variable}`}
