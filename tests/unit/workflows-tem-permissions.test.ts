@@ -54,6 +54,9 @@ const DIR = join(process.cwd(), ".github/workflows");
 const ESCRITA_JUSTIFICADA: Record<string, string> = {
   "publish-image.yml::packages: write":
     "publica a imagem do app no GHCR — é o artefato que o self-hoster instala",
+  "cn-rc1-package.yml::packages: write":
+    "publica só as três imagens zh-CN do RC1 (app, worker, scheduler) no GHCR do fork, " +
+    "com tag 0.1.0-rc1, sem :latest e sem o registry upstream",
   "vigia-de-colisao.yml::pull-requests: write":
     "comenta e rotula o PR cujo número de migration foi tomado depois de ele ficar verde; " +
     "é o mínimo que escreve (um comentário editado por PR + o rótulo), o workflow não roda " +

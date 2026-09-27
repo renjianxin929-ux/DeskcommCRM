@@ -4,8 +4,12 @@ name: CN RC1 package
 # Não move :latest, não move :stable, não publica em ghcr.io/melgarafael.
 # O tag git deskcomm-cn-v0.1.0-rc1 já aponta para esse SHA; este arquivo fica
 # fora dele, de propósito.
+# push neste arquivo, e só nele: workflow_dispatch exige o arquivo na main do
+# fork, e a main não se mexe. O job abaixo faz checkout do tag, não deste commit.
 on:
-  workflow_dispatch:
+  push:
+    branches: [feat/zh-cn-complete]
+    paths: [".github/workflows/cn-rc1-package.yml"]
 
 env:
   SOURCE_SHA: 0cc699b99e12885966923824eddc97b313ad9c12
