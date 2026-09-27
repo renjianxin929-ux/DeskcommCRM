@@ -70,6 +70,12 @@ const GATILHO_ESPERADO: Record<string, { condicao: string | null; efeito: string
       "Este job publica as três imagens zh-CN do RC1 a partir do commit aceito no browser. " +
       "Desligá-lo faz o tag existir sem imagem por trás, e o manifesto de release fica sem artefato.",
   },
+  "cn-rc1-verify.yml::verify": {
+    condicao: null,
+    efeito:
+      "Este job puxa as três imagens já publicadas e roda o healthcheck. " +
+      "Desligá-lo deixa o RC1 sem prova de que o worker e o scheduler sobem.",
+  },
   // --- a cadeia que leva o conserto até a VPS ---------------------------------
   "release.yml::abrir-pr-de-release": {
     condicao: "github.event_name == 'workflow_dispatch'",

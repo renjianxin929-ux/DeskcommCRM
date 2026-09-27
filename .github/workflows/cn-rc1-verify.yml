@@ -1,0 +1,211 @@
+name: CN RC1 verify
+
+# Não reconstrói e não faz push. Confere as imagens já publicadas em 0.1.0-rc1.
+on:
+  push:
+    branches: [feat/zh-cn-complete]
+    paths: [".github/workflows/cn-rc1-verify.yml"]
+
+env:
+  SOURCE_SHA: 0cc699b99e12885966923824eddc97b313ad9c12
+  APP_IMAGE: ghcr.io/renjianxin929-ux/deskcommcrm-cn:0.1.0-rc1
+  WORKER_IMAGE: ghcr.io/renjianxin929-ux/deskcomm-worker-cn:0.1.0-rc1
+  SCHEDULER_IMAGE: ghcr.io/renjianxin929-ux/deskcomm-scheduler-cn:0.1.0-rc1
+  APP_DIGEST: sha256:6f59704df2c2459d2c25d937e020c24d63e6e9fe49e65c260c2d739ab9619088
+  WORKER_DIGEST: sha256:c57b5eee8a0ee15115645b4d29cf31d0bfeed926547bcb404b44928f26129cd8
+  SCHEDULER_DIGEST: sha256:ff5772af20307d20de1dcf235ecc485c2b8c23173162bf2a0f6c82c1b8cf772b
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull e healthchecks, sem rebuild
+        run: |
+          set -euo pipefail
+          OUT="$GITHUB_WORKSPACE/cn-rc1-verify.txt"
+          date -u +%Y-%m-%dT%H:%M:%SZ | sed 's/^/verified_at=/' > "$OUT"
+
+          pull_pinned() {
+            local name="$1" image="$2" expect="$3"
+            docker pull --platform linux/amd64 "$image"
+            local arch digest revision
+            arch="$(docker image inspect "$image" --format '{{.Os}}/{{.Architecture}}')"
+            digest="$(docker image inspect "$image" --format '{{index .RepoDigests 0}}')"
+            revision="$(docker image inspect "$image" --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')"
+            echo "${name}_arch=$arch" >> "$OUT"
+            echo "${name}_repo_digest=$digest" >> "$OUT"
+            echo "${name}_revision=$revision" >> "$OUT"
+            test "$arch" = "linux/amd64"
+            test "${digest##*@}" = "$expect"
+            test "$revision" = "$SOURCE_SHA"
+          }
+
+          pull_pinned app "$APP_IMAGE" "$APP_DIGEST"
+          pull_pinned worker "$WORKER_IMAGE" "$WORKER_DIGEST"
+          pull_pinned scheduler "$SCHEDULER_IMAGE" "$SCHEDULER_DIGEST"
+
+          docker rm -f cn-rc1-app cn-rc1-worker cn-rc1-scheduler cn-rc1-pg >/dev/null 2>&1 || true
+
+          docker run -d --name cn-rc1-app \
+            --health-cmd "node -e \"require('net').connect(3000,'127.0.0.1').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))\"" \
+            --health-interval 5s --health-timeout 5s --health-retries 5 --health-start-period 10s \
+            -e NEXT_PUBLIC_SUPABASE_URL=https://exemplo.supabase.co \
+            -e NEXT_PUBLIC_SUPABASE_ANON_KEY=chave-de-mentira \
+            -e SUPABASE_SERVICE_ROLE_KEY=chave-de-mentira \
+            -e SUPABASE_DB_URL=postgres://u:p@127.0.0.1:5432/postgres \
+            -e SENTRY_DSN=off \
+            "$APP_IMAGE"
+          pronto=nao
+          for _ in $(seq 1 40); do
+            if ! docker ps --filter name=cn-rc1-app --filter status=running -q | grep -q .; then
+              docker logs cn-rc1-app 2>&1 | tail -40 >&2
+              exit 1
+            fi
+            if docker logs cn-rc1-app 2>&1 | grep -qE "Ready in|started server on"; then
+              pronto=sim
+              break
+            fi
+            sleep 3
+          done
+          test "$pronto" = sim
+          docker exec cn-rc1-app node -e "require('net').connect(3000,'127.0.0.1').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))"
+          app_health=starting
+          for _ in $(seq 1 20); do
+            app_health="$(docker inspect --format '{{.State.Health.Status}}' cn-rc1-app)"
+            if [ "$app_health" = healthy ]; then break; fi
+            sleep 3
+          done
+          echo "app_healthcheck=$app_health" >> "$OUT"
+          test "$app_health" = healthy
+
+          docker run -d --name cn-rc1-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=postgres postgres:16-alpine
+          for _ in $(seq 1 30); do
+            docker exec cn-rc1-pg pg_isready -U postgres >/dev/null 2>&1 && break
+            sleep 1
+          done
+          docker exec cn-rc1-pg pg_isready -U postgres
+          docker exec -i cn-rc1-pg psql -v ON_ERROR_STOP=1 -U postgres -d postgres <<'SQL'
+          create table job_queue (
+            id uuid primary key default gen_random_uuid(),
+            organization_id uuid,
+            status text,
+            kind text,
+            attempts int default 0,
+            max_attempts int default 5,
+            locked_by text,
+            locked_at timestamptz,
+            last_error text,
+            payload jsonb
+          );
+          create table lead_checkpoints (id int);
+          create table send_ledger (organization_id uuid, job_id uuid, seq int, status text);
+          create table agent_inbox_items (
+            organization_id uuid, kind text, severity text, title text, body text, ref_kind text, ref_id uuid
+          );
+          create table playbook_versions (
+            id uuid primary key default gen_random_uuid(),
+            organization_id uuid,
+            layer text not null,
+            content text not null
+          );
+          create table playbook_pointers (organization_id uuid, layer text not null, version_id uuid not null);
+          create table channel_sessions (
+            id uuid primary key default gen_random_uuid(),
+            organization_id uuid,
+            status text,
+            updated_at timestamptz not null default now()
+          );
+          SQL
+
+          docker run -d --name cn-rc1-worker --network container:cn-rc1-pg \
+            --health-cmd "wget --quiet --tries=1 --spider http://127.0.0.1:8787/healthz" \
+            --health-interval 5s --health-timeout 5s --health-retries 8 --health-start-period 20s \
+            -e NODE_ENV=production \
+            -e NEXT_PUBLIC_SUPABASE_URL=https://exemplo.supabase.co \
+            -e NEXT_PUBLIC_SUPABASE_ANON_KEY=chave-de-mentira \
+            -e SUPABASE_SERVICE_ROLE_KEY=chave-de-mentira \
+            -e SUPABASE_DB_URL=postgres://postgres:postgres@127.0.0.1:5432/postgres \
+            -e INTERNAL_SECRET=rc1-healthcheck \
+            -e CPF_ENCRYPTION_KEY=rc1-healthcheck \
+            -e WAHA_BYO_ENCRYPTION_KEY=rc1-healthcheck \
+            -e AI_CRED_AES_KEY=rc1-healthcheck \
+            -e WAHA_API_BASE_URL=http://127.0.0.1:9 \
+            -e WAHA_API_KEY=rc1-healthcheck \
+            -e WAHA_WEBHOOK_BASE_URL=https://exemplo.invalid \
+            -e UPSTASH_REDIS_REST_URL=http://127.0.0.1:8079 \
+            -e UPSTASH_REDIS_REST_TOKEN=rc1-healthcheck \
+            -e SENTRY_DSN=off \
+            "$WORKER_IMAGE"
+
+          worker_ok=nao
+          for _ in $(seq 1 40); do
+            if ! docker ps --filter name=cn-rc1-worker --filter status=running -q | grep -q .; then
+              echo "worker morreu no boot" >&2
+              docker logs cn-rc1-worker 2>&1 | tail -80 >&2
+              exit 1
+            fi
+            if docker exec cn-rc1-worker wget --quiet --tries=1 --spider http://127.0.0.1:8787/healthz; then
+              worker_ok=sim
+              break
+            fi
+            sleep 3
+          done
+          if [ "$worker_ok" != sim ]; then
+            docker logs cn-rc1-worker 2>&1 | tail -80 >&2
+            exit 1
+          fi
+          worker_health=starting
+          for _ in $(seq 1 20); do
+            worker_health="$(docker inspect --format '{{.State.Health.Status}}' cn-rc1-worker)"
+            if [ "$worker_health" = healthy ]; then break; fi
+            sleep 3
+          done
+          echo "worker_healthcheck=$worker_health" >> "$OUT"
+          test "$worker_health" = healthy
+
+          docker run -d --name cn-rc1-scheduler -e INTERNAL_SECRET=rc1-healthcheck "$SCHEDULER_IMAGE"
+          sched_cmd=nao
+          for _ in $(seq 1 20); do
+            if docker exec cn-rc1-scheduler pgrep crond >/dev/null 2>&1; then
+              sched_cmd=sim
+              break
+            fi
+            if ! docker ps --filter name=cn-rc1-scheduler --filter status=running -q | grep -q .; then
+              docker logs cn-rc1-scheduler 2>&1 | tail -40 >&2
+              exit 1
+            fi
+            sleep 1
+          done
+          test "$sched_cmd" = sim
+          sched_health=starting
+          for _ in $(seq 1 24); do
+            sched_health="$(docker inspect --format '{{.State.Health.Status}}' cn-rc1-scheduler)"
+            if [ "$sched_health" = healthy ]; then break; fi
+            sleep 5
+          done
+          echo "scheduler_healthcheck=$sched_health" >> "$OUT"
+          echo "scheduler_crond=PASS" >> "$OUT"
+          test "$sched_health" = healthy
+          echo "build_result=PASS" >> "$OUT"
+          cat "$OUT"
+
+      - name: Parar os containers de prova
+        if: always()
+        run: docker rm -f cn-rc1-app cn-rc1-worker cn-rc1-scheduler cn-rc1-pg >/dev/null 2>&1 || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cn-rc1-verify
+          path: cn-rc1-verify.txt
+          if-no-files-found: ignore
